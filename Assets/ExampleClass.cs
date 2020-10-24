@@ -6,18 +6,18 @@ public class ExampleClass : MonoBehaviour {
     AudioSource aud;
     float[] samples;
     const int timeLength = 1;
-    const int samplingRate = 44100;
+    const int samplingRate = 48000;
     void Start() {
         aud = GetComponent<AudioSource>();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, timeLength, samplingRate);
         samples = new float[aud.clip.samples * aud.clip.channels];
+
         // aud.Play();
     }
     // Update is called once per frame
     void Update()
     {
-        
     }
     void FixedUpdate()
     {
@@ -30,6 +30,11 @@ public class ExampleClass : MonoBehaviour {
     public float[] getSamples()
     {
         return samples;
+    }
+
+    public int getRecordPosition()
+    {
+        return Microphone.GetPosition(null);
     }
 
     public int getTimeLength()
