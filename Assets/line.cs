@@ -6,12 +6,13 @@ using System.Linq;
 [RequireComponent(typeof(Camera))]
 public class line : MonoBehaviour
 {
+    bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
     ExampleClass audioData;
     GameObject camera;
     Camera cam;
-    int xLength = 20;
-    int yLength = 10;
+    int xLength = 0;
+    int yLength = 0;
     // Start is called before the first frame update
     float[] x;
     float[] y;
@@ -56,18 +57,30 @@ public class line : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        samples = audioData.getSamples();
-        int nowPos = audioData.getRecordPosition();
-        for(int i = nowPos; i < frameNum + nowPos; i++)
+        if(DEBUG_FFT_WAVE)
         {
-            x[i - nowPos] = xLength * (i - nowPos) / (float)frameNum - (xLength / 2.0f);
-            if(i < frameNum)
+            samples = audioData.getFFTOutReal();
+            for(int i = 0; i < frameNum; i++)
             {
-                y[i - nowPos] = yLength * samples[i] / 2.0f;
+                x[i] = xLength * (i) / (float)frameNum - (xLength / 2.0f);
+                y[i] = yLength * samples[i] / 2.0f;
             }
-            else
+        }
+        else
+        {
+            samples = audioData.getSamples();
+            int nowPos = audioData.getRecordPosition();
+            for(int i = nowPos; i < frameNum + nowPos; i++)
             {
-                y[i - nowPos] = yLength * samples[i - frameNum] / 2.0f;
+                x[i - nowPos] = xLength * (i - nowPos) / (float)frameNum - (xLength / 2.0f);
+                if(i < frameNum)
+                {
+                    y[i - nowPos] = yLength * samples[i] / 2.0f;
+                }
+                else
+                {
+                    y[i - nowPos] = yLength * samples[i - frameNum] / 2.0f;
+                }
             }
         }
     }
