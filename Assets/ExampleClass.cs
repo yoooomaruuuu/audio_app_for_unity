@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using lib_audio_analysis;
@@ -13,7 +14,6 @@ public class ExampleClass : MonoBehaviour {
     fft_funcs fft_class;
     int frame_size;
     void Start() {
-        Debug.Log(Application.dataPath);
         aud = GetComponent<AudioSource>();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, timeLength, samplingRate);
@@ -37,12 +37,8 @@ public class ExampleClass : MonoBehaviour {
     void Update()
     {
         aud.clip.GetData(data_samples, 0);
-        for(int i =0; i<frame_size; i++)
-        {
-            fft_input.real = data_samples;
-        }
+        fft_input.real = Array.ConvertAll(data_samples, fft_funcs.hann_window);
         fft_funcs.fft_exception exc = fft_class.fft_run(fft_input, fft_output);
-        Debug.Log(exc);
     }
 
     public float[] getSamples()

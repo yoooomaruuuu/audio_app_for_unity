@@ -51,7 +51,6 @@ public class line : MonoBehaviour
         cam = camera.GetComponent<Camera>();
         xLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).x * 2;
         yLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).y * 2;
-        lineMaterial.color = Color.cyan;
     }
 
     // Update is called once per frame
@@ -62,7 +61,7 @@ public class line : MonoBehaviour
             samples = audioData.getFFTOutReal();
             for(int i = 0; i < frameNum; i++)
             {
-                x[i] = xLength * (i) / (float)frameNum - (xLength / 2.0f);
+                x[i] = xLength * i / (float)frameNum - (xLength / 2.0f);
                 y[i] = yLength * samples[i] / 2.0f;
             }
         }
