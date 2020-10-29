@@ -8,8 +8,8 @@ public class line : MonoBehaviour
 {
     bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
-    ExampleClass audioData;
-    GameObject camera;
+    audio_manajor audioData;
+    GameObject cameraObj;
     Camera cam;
     int xLength = 0;
     int yLength = 0;
@@ -42,13 +42,13 @@ public class line : MonoBehaviour
     void Start()
     {
         audioSource = GameObject.Find("Audio Source");
-        audioData = audioSource.GetComponent<ExampleClass>();
+        audioData = audioSource.GetComponent<audio_manajor>();
         frameNum = audioData.getSamplingRate() * audioData.getTimeLength();
         x = Enumerable.Repeat<float>(0.0f, frameNum).ToArray() ;
         y = Enumerable.Repeat<float>(0.0f, frameNum).ToArray() ;
 
-        camera = GameObject.Find("Main Camera");
-        cam = camera.GetComponent<Camera>();
+        cameraObj = GameObject.Find("Main Camera");
+        cam = cameraObj.GetComponent<Camera>();
         xLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).x * 2;
         yLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).y * 2;
     }
