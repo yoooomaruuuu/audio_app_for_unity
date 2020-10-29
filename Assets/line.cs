@@ -58,11 +58,12 @@ public class line : MonoBehaviour
     {
         if(DEBUG_FFT_WAVE)
         {
-            samples = audioData.getFFTOutReal();
-            for(int i = 0; i < frameNum; i++)
+            samples = audioData.getPowerSpectre();
+            for(int i = 0; i < frameNum/ 2; i++)
             {
                 x[i] = xLength * i / (float)frameNum - (xLength / 2.0f);
-                y[i] = yLength * samples[i] / 2.0f;
+                //powerスペクトル
+                y[i] = samples[i] - yLength / 2;
             }
         }
         else

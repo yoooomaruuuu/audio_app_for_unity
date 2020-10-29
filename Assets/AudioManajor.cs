@@ -13,7 +13,9 @@ public class AudioManajor : MonoBehaviour {
     const int samplingRate = 48000;
     FFTFuncs fftClass;
     int frameSize;
-    void Start() {
+    float[] powerSpectre;
+    void Start() 
+    {
         aud = GetComponent<AudioSource>();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, timeLength, samplingRate);
@@ -23,12 +25,14 @@ public class AudioManajor : MonoBehaviour {
         fftInput.imaginary = new float[frameSize];
         fftOutput.real = new float[frameSize];
         fftOutput.imaginary = new float[frameSize];
+        powerSpectre = new float[frameSize];
         for(int i =0; i<frameSize; i++)
         {
             fftInput.real[i] = 0f;
             fftInput.imaginary[i] = 0f;
             fftOutput.real[i] = 0f;
             fftOutput.imaginary[i] = 0f;
+            powerSpectre[i] = 0f;
         }
         fftClass = new FFTFuncs(frameSize, frameSize);
         fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
@@ -51,6 +55,12 @@ public class AudioManajor : MonoBehaviour {
         return fftOutput.real;
     }
 
+    public float[] getPowerSpectre()
+    {
+        calcPowerSpectre();
+        return  powerSpectre;
+    }
+
     public int getRecordPosition()
     {
         return Microphone.GetPosition(null);
@@ -64,5 +74,12 @@ public class AudioManajor : MonoBehaviour {
     public int getSamplingRate()
     {
         return samplingRate;
+    }
+    private void calcPowerSpectre()
+    {
+        for(int i=0; i<powerSpectre.Length; i++)
+        {
+            powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / (float)powerSpectre.Length;
+        }
     }
 }
