@@ -4,51 +4,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using lib_audio_analysis;
 
-public class ExampleClass : MonoBehaviour {
+public class AudioManajor : MonoBehaviour {
     AudioSource aud;
-    complex_data fft_input;
-    complex_data fft_output;
-    float[] data_samples;
+    ComplexData fftInput;
+    ComplexData fftOutput;
+    float[] dataSamples;
     const int timeLength = 1;
     const int samplingRate = 48000;
-    fft_funcs fft_class;
-    int frame_size;
+    FFTFuncs fftClass;
+    int frameSize;
     void Start() {
         aud = GetComponent<AudioSource>();
         // マイク名、ループするかどうか、AudioClipの秒数、サンプリングレート を指定する
         aud.clip = Microphone.Start(null, true, timeLength, samplingRate);
-        frame_size = aud.clip.samples * aud.clip.channels;
-        data_samples = new float[frame_size];
-        fft_input.real = new float[frame_size];
-        fft_input.imaginary = new float[frame_size];
-        fft_output.real = new float[frame_size];
-        fft_output.imaginary = new float[frame_size];
-        for(int i =0; i<frame_size; i++)
+        frameSize = aud.clip.samples * aud.clip.channels;
+        dataSamples = new float[frameSize];
+        fftInput.real = new float[frameSize];
+        fftInput.imaginary = new float[frameSize];
+        fftOutput.real = new float[frameSize];
+        fftOutput.imaginary = new float[frameSize];
+        for(int i =0; i<frameSize; i++)
         {
-            fft_input.real[i] = 0f;
-            fft_input.imaginary[i] = 0f;
-            fft_output.real[i] = 0f;
-            fft_output.imaginary[i] = 0f;
+            fftInput.real[i] = 0f;
+            fftInput.imaginary[i] = 0f;
+            fftOutput.real[i] = 0f;
+            fftOutput.imaginary[i] = 0f;
         }
-        fft_class = new fft_funcs(frame_size, frame_size);
-        fft_class.set_fft_mode(fft_funcs.fft_mode.FFT);
+        fftClass = new FFTFuncs(frameSize, frameSize);
+        fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
     }
     // Update is called once per frame
     void Update()
     {
-        aud.clip.GetData(data_samples, 0);
-        fft_input.real = Array.ConvertAll(data_samples, fft_funcs.hann_window);
-        fft_funcs.fft_exception exc = fft_class.fft_run(fft_input, fft_output);
+        aud.clip.GetData(dataSamples, 0);
+        fftInput.real = Array.ConvertAll(dataSamples, FFTFuncs.hann_window);
+        FFTFuncs.fftException exc = fftClass.fftRun(fftInput, fftOutput);
     }
 
     public float[] getSamples()
     {
-        return data_samples;
+        return dataSamples;
     }
 
     public float[] getFFTOutReal()
     {
-        return fft_output.real;
+        return fftOutput.real;
     }
 
     public int getRecordPosition()

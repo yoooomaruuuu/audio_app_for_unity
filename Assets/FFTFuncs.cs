@@ -3,24 +3,24 @@ using System.Runtime.InteropServices;
 
 namespace lib_audio_analysis
 {
-    public struct complex_data
+    public struct ComplexData
     {
         public float[] real;
         public float[] imaginary;
     }
-    public class fft_funcs
+    public class FFTFuncs
     {
-        private int m_frame_size;
-        private IntPtr m_fft_object;
+        private int mFrameSize;
+        private IntPtr mFFTObject;
 
-        public enum fft_mode
+        public enum fftMode
         {
             FFT = 0,
             IFFT = 1,
             ERROR = -1
         }
 
-        public enum fft_exception
+        public enum fftException
         {
             SUCCESS = 0,
             SETTING_ERROR = 1,
@@ -32,13 +32,13 @@ namespace lib_audio_analysis
         static extern void init_fft_component(int fft_size, ref IntPtr func_object);
 
         [DllImport("lib_audio_analysis.dll", EntryPoint = "mylib_fft", CallingConvention = CallingConvention.StdCall)]
-        static extern fft_exception mylib_fft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
+        static extern fftException mylib_fft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
 
         [DllImport("lib_audio_analysis.dll", EntryPoint = "mylib_ifft", CallingConvention = CallingConvention.StdCall)]
-        static extern fft_exception mylib_ifft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
+        static extern fftException mylib_ifft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
 
         [DllImport("lib_audio_analysis.dll", EntryPoint = "fft_mode_setting", CallingConvention = CallingConvention.StdCall)]
-        static extern fft_exception fft_mode_setting(fft_mode mode, IntPtr func_object);
+        static extern fftException fft_mode_setting(fftMode mode, IntPtr func_object);
 
         [DllImport("lib_audio_analysis.dll", EntryPoint = "get_fft_size", CallingConvention = CallingConvention.StdCall)]
         static extern int get_fft_size(IntPtr func_object);
@@ -50,37 +50,37 @@ namespace lib_audio_analysis
         public static extern float hann_window(float x);
 
 
-        public fft_funcs(int init_fft_size, int init_frame_size)
+        public FFTFuncs(int initFFTSize, int initFrameSize)
         {
-            m_frame_size = init_frame_size;
-            m_fft_object = new IntPtr();
-            init_fft_component(init_fft_size, ref m_fft_object);
+            mFrameSize = initFrameSize;
+            mFFTObject = new IntPtr();
+            init_fft_component(initFFTSize, ref mFFTObject);
         } 
 
-        ~fft_funcs()
+        ~FFTFuncs()
         {
-            delete_fft_component(ref m_fft_object);
+            delete_fft_component(ref mFFTObject);
         }
 
         //後でexceptionを返すのではなく返ってきたexceptionで例外処理する
-        public fft_exception fft_run(complex_data input, complex_data output)
+        public fftException fftRun(ComplexData input, ComplexData output)
         {
-            return mylib_fft(input.real, input.imaginary, output.real, output.imaginary, m_fft_object);
+            return mylib_fft(input.real, input.imaginary, output.real, output.imaginary, mFFTObject);
         }
 
-        public fft_exception ifft_run(complex_data input, complex_data output)
+        public fftException ifftRun(ComplexData input, ComplexData output)
         {
-            return mylib_ifft(input.real, input.imaginary, output.real, output.imaginary, m_fft_object);
+            return mylib_ifft(input.real, input.imaginary, output.real, output.imaginary, mFFTObject);
         }
 
-        public fft_exception set_fft_mode(fft_mode mode)
+        public fftException setFFTMode(fftMode mode)
         {
-            return fft_mode_setting(mode, m_fft_object);
+            return fft_mode_setting(mode, mFFTObject);
         }
 
-        public int get_f_size()
+        public int getFFTSize()
         {
-            return get_fft_size(m_fft_object);
+            return get_fft_size(mFFTObject);
         }
     }
 }
