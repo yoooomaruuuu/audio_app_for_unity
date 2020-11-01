@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 [RequireComponent(typeof(Camera))]
 public class line : MonoBehaviour
@@ -63,7 +64,7 @@ public class line : MonoBehaviour
             {
                 x[i] = xLength * i / (float)frameNum - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i] - yLength / 2;
+                y[i] = samples[i] * yLength / 100.0f - (yLength / 2.0f);
             }
         }
         else
