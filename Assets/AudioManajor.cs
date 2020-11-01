@@ -14,7 +14,6 @@ public class AudioManajor : MonoBehaviour {
     FFTFuncs fftClass;
     int frameSize;
     float[] powerSpectre;
-    //const int fftSize = 024;
     void Start() 
     {
         aud = GetComponent<AudioSource>();
@@ -83,7 +82,6 @@ public class AudioManajor : MonoBehaviour {
         for(int i=0; i<powerSpectre.Length; i++)
         {
             powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / (float)powerSpectre.Length;
-            //powerSpectre[i] = (float)(10 * Math.Log10(powerSpectre[i]));
         }
     }
 }

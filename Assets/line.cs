@@ -59,12 +59,12 @@ public class line : MonoBehaviour
     {
         if(DEBUG_FFT_WAVE)
         {
-            samples = audioData.getPowerSpectre();
-            for(int i = 0; i < frameNum/ 2; i++)
+            samples = audioData.getFFTOutReal();
+            for(int i = 0; i < frameNum/ 2.0f; i++)
             {
-                x[i] = xLength * i / (float)frameNum - (xLength / 2.0f);
+                x[i] = xLength * i / (float)(frameNum / 4.0f) - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i] * yLength / 100.0f - (yLength / 2.0f);
+                y[i] = samples[i] * 100.0f / frameNum;// - (yLength / 2.0f);
             }
         }
         else
@@ -87,17 +87,17 @@ public class line : MonoBehaviour
     }
     void OnRenderObject()
     {
-        CreateLineMaterial();
-        lineMaterial.SetPass(0);
-        GL.PushMatrix ();
-        GL.MultMatrix (transform.localToWorldMatrix);
-        GL.Begin (GL.LINES);
-        for(int i = 0; i<frameNum; i++)
-        {
-            GL.Vertex3 (x[i], y[i], 0f);
-        }
-        GL.End ();
-        GL.PopMatrix ();
+        //CreateLineMaterial();
+        //lineMaterial.SetPass(0);
+        //GL.PushMatrix ();
+        //GL.MultMatrix (transform.localToWorldMatrix);
+        //GL.Begin (GL.LINES);
+        //for(int i = 0; i<frameNum; i++)
+        //{
+        //    GL.Vertex3 (x[i], y[i], 0f);
+        //}
+        //GL.End ();
+        //GL.PopMatrix ();
     }
 
 }
