@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using Assets;
 
 [RequireComponent(typeof(Camera))]
 public class line : MonoBehaviour
 {
-    bool DEBUG_FFT_WAVE = true;
+    bool DEBUG_FFT_WAVE = false;
     GameObject audioSource;
-    AudioManajor audioData;
+    //AudioManajor audioData;
+    myNAudioClass audioData;
     GameObject cameraObj;
     Camera cam;
     int xLength = 0;
@@ -18,7 +20,7 @@ public class line : MonoBehaviour
     float[] x;
     float[] y;
     float[] samples;
-    int frameNum;
+    int fftSize;
 
     static Material lineMaterial;
     static void CreateLineMaterial()
@@ -30,7 +32,7 @@ public class line : MonoBehaviour
             Shader shader = Shader.Find("Hidden/Internal-Colored");
             lineMaterial = new Material(shader);
             lineMaterial.hideFlags = HideFlags.HideAndDontSave;
-            lineMaterial.color = Color.cyan;
+            lineMaterial.color = Color.red;
             // Turn on alpha blending
             lineMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             lineMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
@@ -42,12 +44,12 @@ public class line : MonoBehaviour
     }
     void Start()
     {
-        audioSource = GameObject.Find("Audio Source");
-        audioData = audioSource.GetComponent<AudioManajor>();
-        frameNum = audioData.getSamplingRate() * audioData.getTimeLength();
-        x = Enumerable.Repeat<float>(0.0f, frameNum).ToArray() ;
-        y = Enumerable.Repeat<float>(0.0f, frameNum).ToArray() ;
-
+        audioSource = GameObject.Find("NAudioData");
+        audioData = audioSource.GetComponent<myNAudioClass>();
+        fftSize = audioData.getFFTSize();
+        x = Enumerable.Repeat<float>(0.0f, fftSize).ToArray() ;
+        y = Enumerable.Repeat<float>(0.0f, fftSize).ToArray() ;
+        
         cameraObj = GameObject.Find("Main Camera");
         cam = cameraObj.GetComponent<Camera>();
         xLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).x * 2;
@@ -60,44 +62,36 @@ public class line : MonoBehaviour
         if(DEBUG_FFT_WAVE)
         {
             samples = audioData.getFFTOutReal();
-            for(int i = 0; i < frameNum/ 2.0f; i++)
+            for(int i = 0; i < fftSize/ 2.0f; i++)
             {
-                x[i] = xLength * i / (float)(frameNum / 4.0f) - (xLength / 2.0f);
+                x[i] = xLength * i / (float)(fftSize / 4.0f) - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i] * 100.0f / frameNum;// - (yLength / 2.0f);
+                y[i] = samples[i] * 100.0f / fftSize - (yLength / 2.0f);
             }
         }
         else
         {
             samples = audioData.getSamples();
-            int nowPos = audioData.getRecordPosition();
-            for(int i = nowPos; i < frameNum + nowPos; i++)
+            for(int i = 0; i < fftSize; i++)
             {
-                x[i - nowPos] = xLength * (i - nowPos) / (float)frameNum - (xLength / 2.0f);
-                if(i < frameNum)
-                {
-                    y[i - nowPos] = yLength * samples[i] / 2.0f;
-                }
-                else
-                {
-                    y[i - nowPos] = yLength * samples[i - frameNum] / 2.0f;
-                }
+                x[i] = xLength * i / (float)fftSize - (xLength / 2.0f);
+                y[i] = yLength * samples[i] / 2.0f;
             }
         }
     }
     void OnRenderObject()
     {
-        //CreateLineMaterial();
-        //lineMaterial.SetPass(0);
-        //GL.PushMatrix ();
-        //GL.MultMatrix (transform.localToWorldMatrix);
-        //GL.Begin (GL.LINES);
-        //for(int i = 0; i<frameNum; i++)
-        //{
-        //    GL.Vertex3 (x[i], y[i], 0f);
-        //}
-        //GL.End ();
-        //GL.PopMatrix ();
+        CreateLineMaterial();
+        lineMaterial.SetPass(0);
+        GL.PushMatrix ();
+        GL.MultMatrix (transform.localToWorldMatrix);
+        GL.Begin (GL.LINES);
+        for(int i = 0; i<fftSize; i++)
+        {
+            GL.Vertex3 (x[i], y[i], 0f);
+        }
+        GL.End ();
+        GL.PopMatrix ();
     }
 
 }
