@@ -8,7 +8,7 @@ using Assets;
 [RequireComponent(typeof(Camera))]
 public class line : MonoBehaviour
 {
-    bool DEBUG_FFT_WAVE = false;
+    bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
     //AudioManajor audioData;
     myNAudioClass audioData;
@@ -61,12 +61,12 @@ public class line : MonoBehaviour
     {
         if(DEBUG_FFT_WAVE)
         {
-            samples = audioData.getFFTOutReal();
+            samples = audioData.getPowerSpectre();
             for(int i = 0; i < fftSize/ 2.0f; i++)
             {
                 x[i] = xLength * i / (float)(fftSize / 4.0f) - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i] * 100.0f / fftSize - (yLength / 2.0f);
+                y[i] = samples[i];// * 100.0f / fftSize - (yLength / 2.0f);
             }
         }
         else

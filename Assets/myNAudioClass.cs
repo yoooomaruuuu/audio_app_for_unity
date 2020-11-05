@@ -16,24 +16,22 @@ namespace Assets
         int LOCAL_PORT = 2222;
         static UdpClient udp;
         Thread rcv_wave_thread;
-        int frameMsec = 16;
         ComplexData fftInput;
         ComplexData fftOutput;
         List<short> waveBuffer1ch;
-        List<short> waveBuffer2ch;
+        //List<short> waveBuffer2ch;
         int bufferSize;
         float[] dataSamples;
         const int timeLength = 1;
         const int samplingRate = 48000;
         FFTFuncs fftClass;
         float[] powerSpectre;
-
-        void Start()
+        
+        public myNAudioClass()
         {
             bufferSize = 1024;//(int)((frameMsec / 1000.0) * samplingRate);
             waveBuffer1ch = new List<short>();
             waveBuffer2ch = new List<short>();
-            dataSamples = new float[bufferSize];
             dataSamples = new float[bufferSize];
             fftInput.real = new float[bufferSize];
             fftInput.imaginary = new float[bufferSize];
@@ -42,7 +40,10 @@ namespace Assets
             powerSpectre = new float[bufferSize];
             fftClass = new FFTFuncs(bufferSize, bufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
+        }
 
+        void Start()
+        {
             udp = new UdpClient(LOCAL_PORT);
             udp.Client.ReceiveTimeout = 1000;
             rcv_wave_thread = new Thread(new ThreadStart(waveUdpRcv));
@@ -94,11 +95,11 @@ namespace Assets
             return fftOutput.real;
         }
 
-        //public float[] getPowerSpectre()
-        //{
-        //    calcPowerSpectre();
-        //    return  powerSpectre;
-        //}
+        public float[] getPowerSpectre()
+        {
+            calcPowerSpectre();
+            return  powerSpectre;
+        }
 
         //public int getRecordPosition()
         //{
@@ -120,12 +121,12 @@ namespace Assets
             return samplingRate;
         }
         //return dbv
-        //private void calcPowerSpectre()
-        //{
-        //    for(int i=0; i<powerSpectre.Length; i++)
-        //    {
-        //        powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / (float)powerSpectre.Length;
-        //    }
-        //}
+        private void calcPowerSpectre()
+        {
+            for(int i=0; i<powerSpectre.Length; i++)
+            {
+                powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / (float)powerSpectre.Length;
+            }
+        }
     }
 }
