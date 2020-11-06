@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
  #if false
          if (Input.GetKey(KeyCode.RightArrow))
  #else
-        if(audioManajor.getFFTOutReal()[0] > 10.0f)
+        if(audioManajor.getPowerSpectre()[0] > 10.0f)
  #endif
          {
              this.gameObject.transform.Translate(walkSpeed, 0, 0);

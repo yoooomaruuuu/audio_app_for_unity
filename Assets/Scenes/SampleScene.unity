@@ -277,9 +277,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 315638937}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e3c117da69365d4b96454d81d25ca87, type: 3}
+  m_Script: {fileID: 11500000, guid: 3511e1e93c75fc94ab9c1c842b149cd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waveDisplayHz: 4000
 --- !u!4 &315638939
 Transform:
   m_ObjectHideFlags: 0
@@ -564,9 +565,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1211653455}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 95f450e1d80af77428528c599ce8aef1, type: 3}
+  m_Script: {fileID: 11500000, guid: 7472b0f72827d224e9bde5c57b4d46ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputChannels: 2
+  samplingRate: 48000
+  udpTimeout: 1000
+  inputBitRate: 16
 --- !u!4 &1211653457
 Transform:
   m_ObjectHideFlags: 0
