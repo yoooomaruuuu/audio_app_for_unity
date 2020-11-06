@@ -6,17 +6,17 @@ using System;
 using Assets;
 
 [RequireComponent(typeof(Camera))]
-public class line : MonoBehaviour
+public class audioWaveLine : MonoBehaviour
 {
+    public int waveDisplayHz = 4000;
+
     bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
-    //AudioManajor audioData;
-    myNAudioClass audioData;
+    audioManajor audioData;
     GameObject cameraObj;
     Camera cam;
     int xLength = 0;
     int yLength = 0;
-    // Start is called before the first frame update
     float[] x;
     float[] y;
     float[] samples;
@@ -45,7 +45,7 @@ public class line : MonoBehaviour
     void Start()
     {
         audioSource = GameObject.Find("NAudioData");
-        audioData = audioSource.GetComponent<myNAudioClass>();
+        audioData = audioSource.GetComponent<audioManajor>();
         fftSize = audioData.getFFTSize();
         x = Enumerable.Repeat<float>(0.0f, fftSize).ToArray() ;
         y = Enumerable.Repeat<float>(0.0f, fftSize).ToArray() ;
@@ -66,7 +66,7 @@ public class line : MonoBehaviour
             {
                 x[i] = xLength * i / (float)(fftSize / 4.0f) - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i];// * 100.0f / fftSize - (yLength / 2.0f);
+                y[i] = samples[i] - (yLength / 2.0f);
             }
         }
         else

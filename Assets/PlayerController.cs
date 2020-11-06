@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     public bool debug = false;
 
     GameObject audioSource;
-    myNAudioClass audioManajor;
+    audioManajor audioManajor;
     Rigidbody2D rigid2D;
     float jumpForce = 320.0f;
     float walkSpeed = 0.01f;
@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         audioSource = GameObject.Find("NAudioData");
-        audioManajor = audioSource.GetComponent<myNAudioClass>();
+        audioManajor = audioSource.GetComponent<audioManajor>();
         this.rigid2D = GetComponent<Rigidbody2D>();
         stateSprite = Resources.Load<Sprite>("player_state");
         runSprite = Resources.Load<Sprite>("player_run");
