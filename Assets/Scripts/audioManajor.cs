@@ -8,7 +8,11 @@ using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 using System.Threading;
-
+using MagicOnion;
+using MagicOnion.Server;
+using MagicOnion.Client;
+using Grpc.Core;
+using naudio_udp_server;
 namespace Assets
 {
     class audioManajor : MonoBehaviour
@@ -39,6 +43,8 @@ namespace Assets
         const int timeLength = 1;
         FFTFuncs fftClass;
         float[] powerSpectre;
+        Channel channel;
+        IRecordingOrderService client;
         
         public audioManajor()
         {
@@ -52,11 +58,16 @@ namespace Assets
             powerSpectre = new float[bufferSize];
             fftClass = new FFTFuncs(bufferSize, bufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
+            channel = new Channel("127.0.0.1", 12345, ChannelCredentials.Insecure);
+            client = MagicOnionClient.Create<IRecordingOrderService>(channel);
         }
 
         void Start()
         {
+            Debug.Log(Microphone.devices);
             //udpスレッドスタート
+            var result = client.StartRecording();
+            Debug.Log(result);
             udp = new UdpClient(LOCAL_PORT);
             udp.Client.ReceiveTimeout = udpTimeout;
             rcv_wave_thread = new Thread(new ThreadStart(waveUdpRcv));
@@ -71,7 +82,6 @@ namespace Assets
             else if (inputBitRate == BitRate.Long) typeMax = long.MaxValue;
             else if (inputBitRate == BitRate.Float) typeMax = float.MaxValue;
             //waveBufferに十分量のデータが溜まったら、fft処理
-            Debug.Log(typeMax);
             if(waveBuffer.Count > bufferSize)
             {
                 float[] tmp = waveBuffer.GetRange(0, bufferSize).ToArray();
@@ -84,6 +94,7 @@ namespace Assets
 
         private void OnApplicationQuit()
         {
+            client.StopRecording();
             rcv_wave_thread.Abort();
         }
 
