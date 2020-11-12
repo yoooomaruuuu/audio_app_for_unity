@@ -58,16 +58,19 @@ namespace Assets
             powerSpectre = new float[bufferSize];
             fftClass = new FFTFuncs(bufferSize, bufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
-            channel = new Channel("127.0.0.1", 12345, ChannelCredentials.Insecure);
+
+            channel = new Channel("localhost", 80, ChannelCredentials.Insecure);
             client = MagicOnionClient.Create<IRecordingOrderService>(channel);
         }
 
         void Start()
         {
-            Debug.Log(Microphone.devices);
             //udpスレッドスタート
+            string command = @"D:\ProductionRelated\Unity\NAudioInput\naudio_udp_server.exe";
+            VaNilla.InternalServerProcess.StartProcess(command);
             var result = client.StartRecording();
             Debug.Log(result);
+
             udp = new UdpClient(LOCAL_PORT);
             udp.Client.ReceiveTimeout = udpTimeout;
             rcv_wave_thread = new Thread(new ThreadStart(waveUdpRcv));
@@ -95,6 +98,7 @@ namespace Assets
         private void OnApplicationQuit()
         {
             client.StopRecording();
+            channel.ShutdownAsync();
             rcv_wave_thread.Abort();
         }
 

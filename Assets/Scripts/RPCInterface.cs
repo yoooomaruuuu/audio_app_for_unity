@@ -1,4 +1,5 @@
 ﻿using MagicOnion;
+using System.Threading;
 
 namespace naudio_udp_server
 {
@@ -10,6 +11,7 @@ namespace naudio_udp_server
         UnaryResult<int> StartRecording();
         UnaryResult<int> StopRecording();
         UnaryResult<string[]> GetListInputDevices();
+        UnaryResult<ManualResetEvent> GetMre();
     }
 }
 
