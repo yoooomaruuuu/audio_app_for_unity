@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using lib_audio_analysis;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
 using System.Threading;
+using System.Threading.Tasks;
 using MagicOnion;
 using MagicOnion.Server;
 using MagicOnion.Client;
@@ -17,6 +17,33 @@ namespace Assets
 {
     class audioManajor : MonoBehaviour
     {
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "create_input_capture", CallingConvention = CallingConvention.StdCall)]
+        static extern void create_input_capture(UInt32 sample_rate, UInt16 channels, UInt16 bits_per_sample, Int32 frame_ms, ref IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "delete_input_capture", CallingConvention = CallingConvention.StdCall)]
+        static extern void delete_input_capture(ref IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_input_devices_list", CallingConvention = CallingConvention.StdCall)]
+        static extern void get_input_devices_list(int index, StringBuilder tmp, IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_input_devices_list_size", CallingConvention = CallingConvention.StdCall)]
+        static extern int get_input_devices_list_size(IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "init_input_capture", CallingConvention = CallingConvention.StdCall)]
+        static extern void init_input_capture(int device_index, IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_buf_size", CallingConvention = CallingConvention.StdCall)]
+        static extern int get_buf_size(IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "start", CallingConvention = CallingConvention.StdCall)]
+        static extern long start(IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "caputre_data", CallingConvention = CallingConvention.StdCall)]
+        static extern long caputre_data(ref IntPtr data, IntPtr func_object);
+
+        [DllImport("lib_audio_analysis.dll", EntryPoint = "stop", CallingConvention = CallingConvention.StdCall)]
+        static extern long stop(IntPtr func_object);
+
         //入力デバイスの設定はここで入力 
         public int inputChannels = 2;
         public int samplingRate = 48000;
@@ -31,9 +58,6 @@ namespace Assets
 
         public BitRate inputBitRate = BitRate.Short;
 
-        int LOCAL_PORT = 2222;
-        static UdpClient udp;
-        Thread rcv_wave_thread;
         ComplexData fftInput;
         ComplexData fftOutput;
         List<float> waveBuffer;
@@ -43,12 +67,23 @@ namespace Assets
         const int timeLength = 1;
         FFTFuncs fftClass;
         float[] powerSpectre;
-        Channel channel;
-        IRecordingOrderService client;
-        
+
+        int buf_size;
+        byte[] data;
+        IntPtr data_ptr;
+        IntPtr input_cap;
+
+        bool cap_stop;
+
+        Thread rcv_wave_thread;
+
         public audioManajor()
         {
-            bufferSize = 1024;
+        }
+        
+        void Start()
+        {
+            bufferSize = 2048;
             waveBuffer = new List<float>();
             dataSamples = new float[bufferSize];
             fftInput.real = new float[bufferSize];
@@ -59,22 +94,18 @@ namespace Assets
             fftClass = new FFTFuncs(bufferSize, bufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
 
-            channel = new Channel("localhost", 80, ChannelCredentials.Insecure);
-            client = MagicOnionClient.Create<IRecordingOrderService>(channel);
-        }
-
-        void Start()
-        {
-            //udpスレッドスタート
-            string command = @"D:\ProductionRelated\Unity\NAudioInput\naudio_udp_server.exe";
-            VaNilla.InternalServerProcess.StartProcess(command);
-            var result = client.StartRecording();
-            Debug.Log(result);
-
-            udp = new UdpClient(LOCAL_PORT);
-            udp.Client.ReceiveTimeout = udpTimeout;
-            rcv_wave_thread = new Thread(new ThreadStart(waveUdpRcv));
+            cap_stop = false;
+            input_cap = new IntPtr();
+            create_input_capture(48000, 2, 16, 16, ref input_cap);
+            init_input_capture(0, input_cap);
+            buf_size = get_buf_size(input_cap);
+            data = new byte[buf_size];
+            data_ptr = new IntPtr();
+            data_ptr = Marshal.AllocCoTaskMem(buf_size);
+            start(input_cap);
+            rcv_wave_thread = new Thread(new ThreadStart(capture));
             rcv_wave_thread.Start();
+            cap_stop = true;
         }
 
         void Update()
@@ -85,38 +116,40 @@ namespace Assets
             else if (inputBitRate == BitRate.Long) typeMax = long.MaxValue;
             else if (inputBitRate == BitRate.Float) typeMax = float.MaxValue;
             //waveBufferに十分量のデータが溜まったら、fft処理
-            if(waveBuffer.Count > bufferSize)
+        }
+
+        private async void capture()
+        {
+            while(cap_stop)
             {
-                float[] tmp = waveBuffer.GetRange(0, bufferSize).ToArray();
-                dataSamples = Array.ConvertAll(tmp, (x) => x / (float)typeMax);
-                fftInput.real = Array.ConvertAll(dataSamples, FFTFuncs.hann_window);
-                fftClass.fftRun(fftInput, fftOutput);
-                waveBuffer.RemoveRange(0, bufferSize);
+                long test = caputre_data(ref data_ptr, input_cap);
+                //if(test != 0) Debug.Log(test);
+                if(test == 0)
+                {
+                    Marshal.Copy(data_ptr, data, 0, buf_size);
+                    udpDataConvert(data);
+                    //await Task.Delay(16);
+                    if(waveBuffer.Count > bufferSize)
+                    {
+                        float[] tmp = waveBuffer.GetRange(0, bufferSize).ToArray();
+                        dataSamples = Array.ConvertAll(tmp, (x) => x / (float)typeMax);
+                        fftInput.real = Array.ConvertAll(dataSamples, FFTFuncs.hann_window);
+                        fftClass.fftRun(fftInput, fftOutput);
+                        calcPowerSpectre();
+                        waveBuffer.RemoveRange(0, bufferSize);
+                    }
+                }
             }
         }
 
         private void OnApplicationQuit()
         {
-            client.StopRecording();
-            channel.ShutdownAsync();
-            rcv_wave_thread.Abort();
+            cap_stop = false;
+            rcv_wave_thread.Join();
+            stop(input_cap);
+            delete_input_capture(ref input_cap);
         }
 
-        private void waveUdpRcv()
-        {
-            while(true)
-            {
-                IPEndPoint remoteEP = null;
-                if(udp.Available != 0)
-                {
-                    byte[] data = udp.Receive(ref remoteEP);
-                    // udpデータは [ch1, ch2, ch3, ... , chN, ch1, ...]の順で流れてくることを前提としている
-                    // bitRateを8で割ることでbyte数を出し、それが何チャネルあるかを確定させている
-                    // 今回の実装では1chのデータのみを用いるため、1ch分のみを読み込むようにループ 
-                    udpDataConvert(data);
-                }
-            }
-        }
 
         public float[] getSamples()
         {
@@ -124,7 +157,6 @@ namespace Assets
         }
         public float[] getPowerSpectre()
         {
-            calcPowerSpectre();
             return  powerSpectre;
         }
 
@@ -146,46 +178,45 @@ namespace Assets
         {
             for(int i=0; i<powerSpectre.Length; i++)
             {
-                powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0));
+                powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / getFFTSize();
             }
         }
 
         private void udpDataConvert(byte[] data)
         {
             int dataIncremation = (int)inputBitRate / 8 * inputChannels;
-            if(inputBitRate == BitRate.Short)
+            if (inputBitRate == BitRate.Short)
             {
-                for(int i=0; i<data.Length; i+=dataIncremation)
+                for (int i = 0; i < data.Length; i += dataIncremation)
                 {
                     byte[] tmp = new byte[] { data[i], data[i + 1] };
                     waveBuffer.Add((float)BitConverter.ToInt16(tmp, 0));
                 }
             }
-            else if(inputBitRate == BitRate.Int)
+            else if (inputBitRate == BitRate.Int)
             {
-                for(int i=0; i<data.Length; i+=dataIncremation)
+                for (int i = 0; i < data.Length; i += dataIncremation)
                 {
                     byte[] tmp = new byte[] { data[i], data[i + 1], data[i + 2], data[i + 3] };
                     waveBuffer.Add((float)BitConverter.ToInt32(tmp, 0));
                 }
             }
-            else if(inputBitRate == BitRate.Long)
+            else if (inputBitRate == BitRate.Long)
             {
-                for(int i=0; i<data.Length; i+=dataIncremation)
+                for (int i = 0; i < data.Length; i += dataIncremation)
                 {
                     byte[] tmp = new byte[] { data[i], data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7] };
                     waveBuffer.Add((float)BitConverter.ToInt64(tmp, 0));
                 }
             }
-            else if(inputBitRate == BitRate.Float)
+            else if (inputBitRate == BitRate.Float)
             {
-                for(int i=0; i<data.Length; i+=dataIncremation)
+                for (int i = 0; i < data.Length; i += dataIncremation)
                 {
                     byte[] tmp = new byte[] { data[i], data[i + 1], data[i + 2], data[i + 3], data[i + 4], data[i + 5], data[i + 6], data[i + 7] };
                     waveBuffer.Add(BitConverter.ToSingle(tmp, 0));
                 }
             }
-
         }
     }
 }

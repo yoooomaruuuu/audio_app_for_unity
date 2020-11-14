@@ -8,7 +8,7 @@ using Assets;
 [RequireComponent(typeof(Camera))]
 public class audioWaveLine : MonoBehaviour
 {
-    public int waveDisplayHz = 4000;
+    public int waveDisplayHz = 48000;
 
     bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
@@ -62,11 +62,12 @@ public class audioWaveLine : MonoBehaviour
         if(DEBUG_FFT_WAVE)
         {
             samples = audioData.getPowerSpectre();
-            for(int i = 0; i < fftSize/ 2.0f; i++)
+            int viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioData.getSamplingRate());
+            for(int i = 0; i < viewIndex; i++)
             {
-                x[i] = xLength * i / (float)(fftSize / 4.0f) - (xLength / 2.0f);
+                x[i] = xLength * i / (float)viewIndex - (xLength / 2.0f);
                 //powerスペクトル
-                y[i] = samples[i] - (yLength / 2.0f);
+                y[i] = samples[i] - (yLength / 2.0f) + 0.5f;
             }
         }
         else
