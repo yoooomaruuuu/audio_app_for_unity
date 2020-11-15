@@ -10,45 +10,50 @@ using System;
 public class PlayerController : MonoBehaviour
 {
     public bool debug = false;
+    public float jumpHz = 2000.0f;
 
     [SerializeField] private ContactFilter2D filter2d;
 
     GameObject audioSource;
     audioManajor audioManajor;
     Rigidbody2D rigid2D;
-    bool isJump = false;
-    float jumpForce = 300.0f;
     float walkSpeed = 0.05f;
     private Sprite stateSprite;
     private Sprite runSprite;
     private SpriteRenderer spriteRenderer;
 
-    float jumpTime = 0.0f;
+    GameObject camera;
+    GameObject gage;
+
+    bool isWallTouch = false;
+
     // Start is called before the first frame update
     void Start()
     {
         audioSource = GameObject.Find("NAudioData");
         audioManajor = audioSource.GetComponent<audioManajor>();
-        this.rigid2D = GetComponent<Rigidbody2D>();
+        rigid2D = GetComponent<Rigidbody2D>();
         stateSprite = Resources.Load<Sprite>("player_state");
         runSprite = Resources.Load<Sprite>("player_run");
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+
+        camera = GameObject.Find("MainCamera");
+        gage = GameObject.Find("gageController");
     }
 
     private void FixedUpdate()
     {
-        bool isTouch = this.rigid2D.IsTouching(filter2d);
-        //Debug.Log(isTouch);
+        bool isTouch = rigid2D.IsTouching(filter2d);
 #if false
          if(Input.GetKey(KeyCode.Space) && isTouch)
          {
-            this.rigid2D.AddForce(transform.up * this.jumpForce); 
+            rigid2D.AddForce(transform.up * 500); 
             //this.gameObject.transform.Translate(0, 0.5f, 0);
          }
 #else
         if(isTouch)
         {
-            int jumpIndex = (int)(audioManajor.getFFTSize() * (300.0f / (float)audioManajor.getSamplingRate() ));
+            int jumpIndex = (int)(audioManajor.getFFTSize() * (jumpHz / (float)audioManajor.getSamplingRate() ));
             float tmp = 0.0f;
             for (int i = jumpIndex; i < audioManajor.getFFTSize() / 2; i++) tmp += audioManajor.getPowerSpectre()[i];
             if(tmp > 20.0f)
@@ -60,26 +65,36 @@ public class PlayerController : MonoBehaviour
  #endif
  
  #if false
-         if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKey(KeyCode.RightArrow))
  #else
-        if(audioManajor.getPowerSpectre()[0] > 3.0f)
+        if(audioManajor.getPowerSpectre()[0] > 2.0f)
  #endif
-         {
-             this.gameObject.transform.Translate(walkSpeed, 0, 0);
-             spriteRenderer.sprite = runSprite;
-         }
-         else
-         {
-             spriteRenderer.sprite = stateSprite;
-         }
-         if(debug)
-         {
-             if (Input.GetKey(KeyCode.LeftArrow)) this.gameObject.transform.Translate(-1.0f * walkSpeed, 0, 0);;
-         }
+        {
+            if(!isWallTouch)
+            {
+                this.gameObject.transform.Translate(walkSpeed, 0, 0);
+                camera.transform.Translate(walkSpeed, 0, 0);
+                gage.transform.Translate(walkSpeed, 0, 0);
+            }
+            spriteRenderer.sprite = runSprite;
+        }
+        else
+        {
+            spriteRenderer.sprite = stateSprite;
+        }
+        if(debug)
+        {
+            if (Input.GetKey(KeyCode.LeftArrow)) this.gameObject.transform.Translate(-1.0f * walkSpeed, 0, 0);;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+    }
+    
+    public void setIsWallTouch(bool flg)
+    {
+        isWallTouch = flg;
     }
 }

@@ -33,7 +33,7 @@ public class audioGageControll : MonoBehaviour
         x = new float[fftSize];
         y = new float[fftSize];
         
-        cameraObj = GameObject.Find("Main Camera");
+        cameraObj = GameObject.Find("MainCamera");
         cam = cameraObj.GetComponent<Camera>();
         xLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).x * 2;
         yLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).y * 2;
@@ -44,8 +44,9 @@ public class audioGageControll : MonoBehaviour
         for(int i=0; i<gageNum; i++)
         {
             gages[i] = Instantiate(gagePrefab) as GameObject;
-            gages[i].transform.position = new Vector3(stan * i + stan / 2.0f - xLength / 2.0f, 0, 1) ;
+            gages[i].transform.position = new Vector3(stan * i + stan / 2.0f - xLength / 2.0f, 0, -1) ;
             gages[i].transform.localScale = new Vector3(sizeE, 1, 1);
+            gages[i].transform.SetParent(this.gameObject.transform);
         }
     }
 
@@ -69,7 +70,7 @@ public class audioGageControll : MonoBehaviour
                 }
                 //test = test / (float)sampleNum;
                 if (double.IsNaN(test)) test = 0.0f;
-                gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, test * 4.0f, 1);
+                gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, test/30.0f, 1);
             }
         }
         else
