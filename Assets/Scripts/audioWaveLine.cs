@@ -8,7 +8,7 @@ using Assets;
 [RequireComponent(typeof(Camera))]
 public class audioWaveLine : MonoBehaviour
 {
-    public int waveDisplayHz = 48000;
+    public int waveDisplayHz;
 
     bool DEBUG_FFT_WAVE = true;
     GameObject audioSource;
@@ -21,6 +21,7 @@ public class audioWaveLine : MonoBehaviour
     float[] y;
     float[] samples;
     int fftSize;
+    int viewIndex = 0;
 
     static Material lineMaterial;
     static void CreateLineMaterial()
@@ -62,7 +63,7 @@ public class audioWaveLine : MonoBehaviour
         if(DEBUG_FFT_WAVE)
         {
             samples = audioData.getPowerSpectre();
-            int viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioData.getSamplingRate());
+            viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioData.getSamplingRate());
             for(int i = 0; i < viewIndex; i++)
             {
                 x[i] = xLength * i / (float)viewIndex - (xLength / 2.0f);
@@ -87,7 +88,7 @@ public class audioWaveLine : MonoBehaviour
         GL.PushMatrix ();
         GL.MultMatrix (transform.localToWorldMatrix);
         GL.Begin (GL.LINES);
-        for(int i = 0; i<fftSize; i++)
+        for(int i = 0; i<viewIndex; i++)
         {
             GL.Vertex3 (x[i], y[i], 0f);
         }

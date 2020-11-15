@@ -38,7 +38,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         bool isTouch = this.rigid2D.IsTouching(filter2d);
-        Debug.Log(isTouch);
+        //Debug.Log(isTouch);
 #if false
          if(Input.GetKey(KeyCode.Space) && isTouch)
          {
