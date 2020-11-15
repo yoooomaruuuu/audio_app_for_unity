@@ -3,16 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using lib_audio_analysis;
-using System.Net;
-using System.Net.Sockets;
 using UnityEngine;
 using System.Threading;
-using System.Threading.Tasks;
-using MagicOnion;
-using MagicOnion.Server;
-using MagicOnion.Client;
-using Grpc.Core;
-using naudio_udp_server;
 namespace Assets
 {
     class audioManajor : MonoBehaviour
