@@ -17,10 +17,12 @@ public class PlayerController : MonoBehaviour
     GameObject audioSource;
     audioManajor audioManajor;
     Rigidbody2D rigid2D;
-    float walkSpeed = 0.05f;
-    private Sprite stateSprite;
-    private Sprite runSprite;
-    private SpriteRenderer spriteRenderer;
+    float walkSpeed = 0.07f;
+    //private Sprite stateSprite;
+    //private Sprite runSprite;
+    //private SpriteRenderer spriteRenderer;
+
+    private Animator animator;
 
     GameObject camera;
     GameObject gage;
@@ -33,12 +35,14 @@ public class PlayerController : MonoBehaviour
         audioSource = GameObject.Find("NAudioData");
         audioManajor = audioSource.GetComponent<audioManajor>();
         rigid2D = GetComponent<Rigidbody2D>();
-        stateSprite = Resources.Load<Sprite>("player_state");
-        runSprite = Resources.Load<Sprite>("player_run");
-        spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        //stateSprite = Resources.Load<Sprite>("player_state");
+        //runSprite = Resources.Load<Sprite>("player_run");
+        //spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
 
         camera = GameObject.Find("MainCamera");
         gage = GameObject.Find("gageController");
+
+        animator = GetComponent<Animator>();
     }
 
     private void FixedUpdate()
@@ -76,11 +80,13 @@ public class PlayerController : MonoBehaviour
                 camera.transform.Translate(walkSpeed, 0, 0);
                 gage.transform.Translate(walkSpeed, 0, 0);
             }
-            spriteRenderer.sprite = runSprite;
+            animator.SetTrigger("Run");
+            //spriteRenderer.sprite = runSprite;
         }
         else
         {
-            spriteRenderer.sprite = stateSprite;
+            //spriteRenderer.sprite = stateSprite;
+            animator.SetTrigger("State");
         }
         if(debug)
         {

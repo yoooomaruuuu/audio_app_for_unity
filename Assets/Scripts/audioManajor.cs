@@ -2,39 +2,15 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using lib_audio_analysis;
 using UnityEngine;
+using lib_audio_analysis;
 using System.Threading;
 namespace Assets
 {
     class audioManajor : MonoBehaviour
     {
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "create_input_capture", CallingConvention = CallingConvention.StdCall)]
-        static extern void create_input_capture(UInt32 sample_rate, UInt16 channels, UInt16 bits_per_sample, Int32 frame_ms, ref IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "delete_input_capture", CallingConvention = CallingConvention.StdCall)]
-        static extern void delete_input_capture(ref IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_input_devices_list", CallingConvention = CallingConvention.StdCall)]
-        static extern void get_input_devices_list(int index, StringBuilder tmp, IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_input_devices_list_size", CallingConvention = CallingConvention.StdCall)]
-        static extern int get_input_devices_list_size(IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "init_input_capture", CallingConvention = CallingConvention.StdCall)]
-        static extern void init_input_capture(int device_index, IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_buf_size", CallingConvention = CallingConvention.StdCall)]
-        static extern int get_buf_size(IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "start", CallingConvention = CallingConvention.StdCall)]
-        static extern long start(IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "caputre_data", CallingConvention = CallingConvention.StdCall)]
-        static extern long caputre_data(ref IntPtr data, IntPtr func_object);
-
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "stop", CallingConvention = CallingConvention.StdCall)]
-        static extern long stop(IntPtr func_object);
+        ApplicationManajor appManage;
+        InputCaptureFuncs inputCap;
 
         //入力デバイスの設定はここで入力 
         public int inputChannels = 2;
@@ -63,18 +39,16 @@ namespace Assets
         int buf_size;
         byte[] data;
         IntPtr data_ptr;
-        IntPtr input_cap;
 
         bool cap_stop;
 
         Thread rcv_wave_thread;
 
-        public audioManajor()
-        {
-        }
-        
         void Start()
         {
+            appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
+            inputCap = appManage.GetInputCap();
+
             bufferSize = 2048;
             waveBuffer = new List<float>();
             dataSamples = new float[bufferSize];
@@ -87,14 +61,15 @@ namespace Assets
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
 
             cap_stop = false;
-            input_cap = new IntPtr();
-            create_input_capture(48000, 2, 16, 16, ref input_cap);
-            init_input_capture(0, input_cap);
-            buf_size = get_buf_size(input_cap);
+            inputCap.initInputCapture(appManage.config.samplingRate, appManage.config.channels, appManage.config.bitsPerSample, appManage.config.frameMs, appManage.config.deviceIndex);
+            buf_size = inputCap.getDataBufferSize();
             data = new byte[buf_size];
             data_ptr = new IntPtr();
             data_ptr = Marshal.AllocCoTaskMem(buf_size);
-            start(input_cap);
+            if(inputCap.startCapture() != 0)
+            {
+                appManage.error();
+            }
             rcv_wave_thread = new Thread(new ThreadStart(capture));
             rcv_wave_thread.Start();
             cap_stop = true;
@@ -114,7 +89,7 @@ namespace Assets
         {
             while(cap_stop)
             {
-                long test = caputre_data(ref data_ptr, input_cap);
+                long test = inputCap.getCaptureData(ref data_ptr);
                 //if(test != 0) Debug.Log(test);
                 if(test == 0)
                 {
@@ -134,12 +109,11 @@ namespace Assets
             }
         }
 
-        private void OnApplicationQuit()
+        private void OnDestroy()
         {
             cap_stop = false;
             rcv_wave_thread.Join();
-            stop(input_cap);
-            delete_input_capture(ref input_cap);
+            inputCap.stopCapture();
         }
 
 
