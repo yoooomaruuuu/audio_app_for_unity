@@ -18,7 +18,7 @@ public class PlayerIsWallTouch : MonoBehaviour
         
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D col)
     {
         parent.setIsWallTouch(true);
     }

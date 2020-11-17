@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         bool isTouch = rigid2D.IsTouching(filter2d);
-#if false
+#if true
          if(Input.GetKey(KeyCode.Space) && isTouch)
          {
             rigid2D.AddForce(transform.up * 500); 
@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour
         }
  #endif
  
- #if false
+ #if true
         if (Input.GetKey(KeyCode.RightArrow))
  #else
         if(audioManajor.getPowerSpectre()[0] > 2.0f)
