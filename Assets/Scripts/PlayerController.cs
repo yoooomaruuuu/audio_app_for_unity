@@ -14,13 +14,15 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private ContactFilter2D filter2d;
 
+    AudioSensitivityController sensiController;
+    float jumpSensitivity = 1.0f;
+    float moveSensitivity = 2.0f;
     GameObject audioSource;
     audioManajor audioManajor;
     Rigidbody2D rigid2D;
     float walkSpeed = 0.07f;
-    //private Sprite stateSprite;
-    //private Sprite runSprite;
-    //private SpriteRenderer spriteRenderer;
+    float jumpForceLow = 20.0f;
+    float jumpForceRaise = 30.0f;
 
     private Animator animator;
 
@@ -32,6 +34,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
         audioSource = GameObject.Find("NAudioData");
         audioManajor = audioSource.GetComponent<audioManajor>();
         rigid2D = GetComponent<Rigidbody2D>();
@@ -48,7 +51,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         bool isTouch = rigid2D.IsTouching(filter2d);
-#if true
+#if false
          if(Input.GetKey(KeyCode.Space) && isTouch)
          {
             rigid2D.AddForce(transform.up * 500); 
@@ -60,18 +63,19 @@ public class PlayerController : MonoBehaviour
             int jumpIndex = (int)(audioManajor.getFFTSize() * (jumpHz / (float)audioManajor.getSamplingRate() ));
             float tmp = 0.0f;
             for (int i = jumpIndex; i < audioManajor.getFFTSize() / 2; i++) tmp += audioManajor.getPowerSpectre()[i];
-            if(tmp > 20.0f)
+            tmp *= tmp * jumpSensitivity;
+            if(tmp > jumpForceLow)
              {
-                this.rigid2D.AddForce(transform.up * Math.Min(tmp, 30.0f) * 10); 
+                this.rigid2D.AddForce(transform.up * Math.Min(tmp, jumpForceRaise) * 10); 
                 //this.gameObject.transform.Translate(0, 0.5f, 0);
              }
         }
  #endif
  
- #if true
+ #if false
         if (Input.GetKey(KeyCode.RightArrow))
  #else
-        if(audioManajor.getPowerSpectre()[0] > 2.0f)
+        if(audioManajor.getPowerSpectre()[0] > moveSensitivity)
  #endif
         {
             if(!isWallTouch)
@@ -97,6 +101,21 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
+        {
+            jumpSensitivity = 300.0f;
+            moveSensitivity = 0.01f;
+        }
+        else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM)
+        {
+            jumpSensitivity = 3.0f;
+            moveSensitivity = 1.0f;
+        }
+        else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
+        {
+            jumpSensitivity = 1.0f;
+            moveSensitivity = 2.0f;
+        }
     }
     
     public void setIsWallTouch(bool flg)

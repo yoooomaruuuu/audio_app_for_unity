@@ -24,10 +24,12 @@ public class audioGageControll : MonoBehaviour
     int fftSize;
     int viewIndex = 0;
 
-    static Material lineMaterial;
+    AudioSensitivityController sensiController;
+    float gageLevelSensi = 30.0f;
     void Start()
     {
         audioSource = GameObject.Find("NAudioData");
+        sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
         audioData = audioSource.GetComponent<audioManajor>();
         fftSize = audioData.getFFTSize();
         x = new float[fftSize];
@@ -53,8 +55,13 @@ public class audioGageControll : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 0.1f;
+        else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 10.0f;
+        else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 30.0f;
+
         if(DEBUG_FFT_WAVE)
         {
+            Debug.Log(gageLevelSensi);
             samples = audioData.getPowerSpectre();
             viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioData.getSamplingRate());
             int sampleNum = viewIndex / gageNum;
@@ -70,7 +77,7 @@ public class audioGageControll : MonoBehaviour
                 }
                 //test = test / (float)sampleNum;
                 if (double.IsNaN(test)) test = 0.0f;
-                gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, test/30.0f, 1);
+                gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, test/gageLevelSensi, 1);
             }
         }
         else
