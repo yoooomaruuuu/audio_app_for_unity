@@ -28,25 +28,25 @@ namespace lib_audio_analysis
             MODE_ERROR = 3
         }
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "create_fft_component", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "create_fft_component", CallingConvention = CallingConvention.StdCall)]
         static extern void create_fft_component(int fft_size, ref IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "mylib_fft", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "mylib_fft", CallingConvention = CallingConvention.StdCall)]
         static extern fftException mylib_fft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "mylib_ifft", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "mylib_ifft", CallingConvention = CallingConvention.StdCall)]
         static extern fftException mylib_ifft(float[] input_re, float[] input_im, float[] output_re, float[] output_im, IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "fft_mode_setting", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "fft_mode_setting", CallingConvention = CallingConvention.StdCall)]
         static extern fftException fft_mode_setting(fftMode mode, IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "get_fft_size", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "get_fft_size", CallingConvention = CallingConvention.StdCall)]
         static extern int get_fft_size(IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "delete_fft_component", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "delete_fft_component", CallingConvention = CallingConvention.StdCall)]
         static extern void delete_fft_component(ref IntPtr func_object);
 
-        [DllImport("lib_audio_analysis.dll", EntryPoint = "hann_window", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("lib_audio_analysis", EntryPoint = "hann_window", CallingConvention = CallingConvention.StdCall)]
         public static extern float hann_window(float x);
 
         public FFTFuncs(int initFFTSize, int initFrameSize)
