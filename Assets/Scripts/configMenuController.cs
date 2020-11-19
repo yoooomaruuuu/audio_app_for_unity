@@ -27,35 +27,36 @@ public class configMenuController : MonoBehaviour
         bitsPerSampleList.value = PlayerPrefs.GetInt("bps", 0);
         devicesList.value = PlayerPrefs.GetInt("device", 0);
         inputCap = appmanage.GetInputCap();
+
         for (int i = 0; i < inputCap.getInputDevicesListSize(); i++)
         {
             var tmp = new StringBuilder(256, 256);
             inputCap.getInputDevicesList(i, tmp);
             devicesList.options.Add(new Dropdown.OptionData { text = tmp.ToString() });
         }
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void configApply()
     {
-        appmanage.config = new ApplicationManajor.Config(
-            uint.Parse(samplingRateList.captionText.text),
-            ushort.Parse(channelList.captionText.text), 
-            ushort.Parse(bitsPerSampleList.captionText.text), 
-            16, 
-            devicesList.value
-            );
-        PlayerPrefs.SetInt("s-rate", samplingRateList.value);
-        PlayerPrefs.SetInt("ch", channelList.value);
-        PlayerPrefs.SetInt("bps", bitsPerSampleList.value);
-        PlayerPrefs.SetInt("device", devicesList.value);
-        appmanage.returnMainMenu();
+        if(devicesList.value != 0)
+        {
+            appmanage.config = new ApplicationManajor.Config(
+                uint.Parse(samplingRateList.captionText.text),
+                ushort.Parse(channelList.captionText.text), 
+                ushort.Parse(bitsPerSampleList.captionText.text), 
+                16, 
+                devicesList.value - 1
+                );
+            PlayerPrefs.SetInt("s-rate", samplingRateList.value);
+            PlayerPrefs.SetInt("ch", channelList.value);
+            PlayerPrefs.SetInt("bps", bitsPerSampleList.value);
+            PlayerPrefs.SetInt("device", devicesList.value);
+            appmanage.gameStart();
+        }
+        else
+        {
+            Debug.Log("non selected device");
+        }
     }
 
 }
