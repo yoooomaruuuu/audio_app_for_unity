@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿#define DEBUG
+#undef DEBUG
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -51,7 +54,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         bool isTouch = rigid2D.IsTouching(filter2d);
-#if false
+#if DEBUG
          if(Input.GetKey(KeyCode.Space) && isTouch)
          {
             rigid2D.AddForce(transform.up * 500); 
@@ -72,7 +75,7 @@ public class PlayerController : MonoBehaviour
         }
  #endif
  
- #if false
+ #if DEBUG
         if (Input.GetKey(KeyCode.RightArrow))
  #else
         if(audioManajor.getPowerSpectre()[0] > moveSensitivity)
