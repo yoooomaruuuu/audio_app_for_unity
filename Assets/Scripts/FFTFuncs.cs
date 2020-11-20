@@ -5,8 +5,18 @@ namespace lib_audio_analysis
 {
     public struct ComplexData
     {
-        public float[] real;
-        public float[] imaginary;
+        private float[] real;
+        private float[] imaginary;
+        public float[] Real
+        {
+            set { this.real = value; }
+            get { return this.real; }
+        }
+        public float[] Imaginary
+        {
+            set { this.imaginary = value; }
+            get { return this.imaginary; }
+        }
     }
     public class FFTFuncs
     {
@@ -64,12 +74,12 @@ namespace lib_audio_analysis
         //後でexceptionを返すのではなく返ってきたexceptionで例外処理する
         public fftException fftRun(ComplexData input, ComplexData output)
         {
-            return mylib_fft(input.real, input.imaginary, output.real, output.imaginary, mFFTObject);
+            return mylib_fft(input.Real, input.Imaginary, output.Real, output.Imaginary, mFFTObject);
         }
 
         public fftException ifftRun(ComplexData input, ComplexData output)
         {
-            return mylib_ifft(input.real, input.imaginary, output.real, output.imaginary, mFFTObject);
+            return mylib_ifft(input.Real, input.Imaginary, output.Real, output.Imaginary, mFFTObject);
         }
 
         public fftException setFFTMode(fftMode mode)

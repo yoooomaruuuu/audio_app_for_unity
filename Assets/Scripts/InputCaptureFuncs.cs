@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.IO;
 
 
 namespace lib_audio_analysis
@@ -36,53 +34,53 @@ namespace lib_audio_analysis
         [DllImport("lib_audio_analysis", EntryPoint = "stop", CallingConvention = CallingConvention.StdCall)]
         static extern long stop(IntPtr func_object);
 
-        IntPtr inputCap;
+        private IntPtr mInputCap;
 
         public InputCaptureFuncs()
         {
-            inputCap = new IntPtr();
-            create_input_capture(ref inputCap);
+            mInputCap = new IntPtr();
+            create_input_capture(ref mInputCap);
         }
 
         ~InputCaptureFuncs()
         {
-            delete_input_capture(ref inputCap);
+            delete_input_capture(ref mInputCap);
         }
 
 
         public void initInputCapture(UInt32 sampleRate, UInt16 channels, UInt16 bitsPerSample, Int32 frameMs, int deviceIndex)
         {
-            init_input_capture(sampleRate, channels, bitsPerSample, frameMs, deviceIndex, inputCap);
+            init_input_capture(sampleRate, channels, bitsPerSample, frameMs, deviceIndex, mInputCap);
         }
 
         public long startCapture()
         {
-            return start(inputCap);
+            return start(mInputCap);
         }
 
         public long getCaptureData(ref IntPtr data)
         {
-            return caputre_data(ref data, inputCap);
+            return caputre_data(ref data, mInputCap);
         }
 
         public long stopCapture()
         {
-            return stop(inputCap);
+            return stop(mInputCap);
         }
 
         public int getDataBufferSize()
         {
-            return get_buf_size(inputCap);
+            return get_buf_size(mInputCap);
         }
 
         public void getInputDevicesList(int index, StringBuilder tmp)
         {
-            get_input_devices_list(index, tmp, inputCap);
+            get_input_devices_list(index, tmp, mInputCap);
         }
 
         public int getInputDevicesListSize()
         {
-            return get_input_devices_list_size(inputCap);
+            return get_input_devices_list_size(mInputCap);
         }
     }
 }

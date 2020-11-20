@@ -1,40 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using UnityEngine;
 using lib_audio_analysis;
 using System.Threading;
-namespace Assets
+using audio_app.common;
+
+namespace audio_app
 {
     class audioManajor : MonoBehaviour
     {
         ApplicationManajor appManage;
         InputCaptureFuncs inputCap;
+        FFTFuncs fftClass;
 
         //入力デバイスの設定はここで入力 
-        public int inputChannels = 2;
-        public int samplingRate = 48000;
-        public int udpTimeout = 1000;
-        public enum BitRate 
+        ushort inputChannels;
+        public uint SamplingRate { get; private set; } 
+        BitRate inputBitRate;
+        public float[] DataSamples { get; private set; }
+        float[] powerSpectre;
+        public float[] PowerSpectre
         {
-            Short = 16,
-            Int = 32,
-            Long = 64,
-            Float = 32,
-        } ;
-
-        public BitRate inputBitRate = BitRate.Short;
-
+            get { calcPowerSpectre(); return powerSpectre; }
+        }
+        public int FFTSize { get { return fftClass.getFFTSize(); } }
         ComplexData fftInput;
         ComplexData fftOutput;
         List<float> waveBuffer;
         int bufferSize;
-        float typeMax;
-        float[] dataSamples;
-        const int timeLength = 1;
-        FFTFuncs fftClass;
-        float[] powerSpectre;
+        double typeMax;
 
         int buf_size;
         byte[] data;
@@ -47,21 +42,33 @@ namespace Assets
         void Start()
         {
             appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
-            inputCap = appManage.GetInputCap();
+            inputCap = appManage.InputCap;
 
             bufferSize = 2048;
             waveBuffer = new List<float>();
-            dataSamples = new float[bufferSize];
-            fftInput.real = new float[bufferSize];
-            fftInput.imaginary = new float[bufferSize];
-            fftOutput.real = new float[bufferSize];
-            fftOutput.imaginary = new float[bufferSize];
+            DataSamples = new float[bufferSize];
+            fftInput.Real = new float[bufferSize];
+            fftInput.Imaginary = new float[bufferSize]; 
+            fftOutput.Real = new float[bufferSize];
+            fftOutput.Imaginary = new float[bufferSize];
             powerSpectre = new float[bufferSize];
             fftClass = new FFTFuncs(bufferSize, bufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
 
             cap_stop = false;
-            inputCap.initInputCapture(appManage.config.samplingRate, appManage.config.channels, appManage.config.bitsPerSample, appManage.config.frameMs, appManage.config.deviceIndex);
+            inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
+            SamplingRate = appManage.AppConfig.SamplingRate;
+            inputChannels = appManage.AppConfig.Channels;
+            inputBitRate = appManage.AppConfig.BitsPerSample;
+
+            //typeMaxの初期化
+            if (inputBitRate == BitRate.Integer16) typeMax = Int16.MaxValue;
+            else if (inputBitRate == BitRate.Integer24) typeMax = Int24.max();
+            else if (inputBitRate == BitRate.Integer32) typeMax = Int32.MaxValue;
+            else if (inputBitRate == BitRate.Integer64) typeMax = Int64.MaxValue;
+            else if (inputBitRate == BitRate.Floating32) typeMax = Single.MaxValue;
+            else typeMax = Int16.MaxValue;
+
             buf_size = inputCap.getDataBufferSize();
             data = new byte[buf_size];
             data_ptr = new IntPtr();
@@ -74,17 +81,6 @@ namespace Assets
             rcv_wave_thread.Start();
             cap_stop = true;
         }
-
-        void Update()
-        {
-            //データ変換
-            if (inputBitRate == BitRate.Short) typeMax = short.MaxValue;
-            else if (inputBitRate == BitRate.Int) typeMax = int.MaxValue;
-            else if (inputBitRate == BitRate.Long) typeMax = long.MaxValue;
-            else if (inputBitRate == BitRate.Float) typeMax = float.MaxValue;
-            //waveBufferに十分量のデータが溜まったら、fft処理
-        }
-
         private async void capture()
         {
             while(cap_stop)
@@ -94,13 +90,13 @@ namespace Assets
                 if(test == 0)
                 {
                     Marshal.Copy(data_ptr, data, 0, buf_size);
-                    udpDataConvert(data);
+                    inputSoundDataConvert(data);
                     //await Task.Delay(16);
                     if(waveBuffer.Count > bufferSize)
                     {
                         float[] tmp = waveBuffer.GetRange(0, bufferSize).ToArray();
-                        dataSamples = Array.ConvertAll(tmp, (x) => x / (float)typeMax);
-                        fftInput.real = Array.ConvertAll(dataSamples, FFTFuncs.hann_window);
+                        DataSamples = Array.ConvertAll(tmp, (x) => (float)(x / (double)typeMax));
+                        fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
                         fftClass.fftRun(fftInput, fftOutput);
                         calcPowerSpectre();
                         waveBuffer.RemoveRange(0, bufferSize);
@@ -117,41 +113,19 @@ namespace Assets
         }
 
 
-        public float[] getSamples()
-        {
-            return dataSamples;
-        }
-        public float[] getPowerSpectre()
-        {
-            return  powerSpectre;
-        }
-
-        public int getFFTSize()
-        {
-            return fftClass.getFFTSize();
-        }
-
-        public int getTimeLength()
-        {
-            return timeLength;
-        }
-
-        public int getSamplingRate()
-        {
-            return samplingRate;
-        }
         private void calcPowerSpectre()
         {
             for(int i=0; i<powerSpectre.Length; i++)
             {
-                powerSpectre[i] = (float)(Math.Pow(fftOutput.real[i], 2.0) + Math.Pow(fftOutput.imaginary[i], 2.0)) / getFFTSize();
+                powerSpectre[i] = (float)(Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0)) / FFTSize;
             }
+            Debug.Log("powerSpectre:" + powerSpectre[1]);
         }
 
-        private void udpDataConvert(byte[] data)
+        private void inputSoundDataConvert(byte[] data)
         {
             int dataIncremation = (int)inputBitRate / 8 * inputChannels;
-            if (inputBitRate == BitRate.Short)
+            if (inputBitRate == BitRate.Integer16)
             {
                 for (int i = 0; i < data.Length; i += dataIncremation)
                 {
@@ -159,7 +133,15 @@ namespace Assets
                     waveBuffer.Add((float)BitConverter.ToInt16(tmp, 0));
                 }
             }
-            else if (inputBitRate == BitRate.Int)
+            else if (inputBitRate == BitRate.Integer24)
+            {
+                for (int i = 0; i < data.Length; i += dataIncremation)
+                {
+                    byte[] tmp = new byte[] { data[i], data[i + 1], data[i + 2] };
+                    waveBuffer.Add((float)BitConverter.ToInt32(tmp, 0));
+                }
+            }
+            else if (inputBitRate == BitRate.Integer32)
             {
                 for (int i = 0; i < data.Length; i += dataIncremation)
                 {
@@ -167,7 +149,7 @@ namespace Assets
                     waveBuffer.Add((float)BitConverter.ToInt32(tmp, 0));
                 }
             }
-            else if (inputBitRate == BitRate.Long)
+            else if (inputBitRate == BitRate.Integer64)
             {
                 for (int i = 0; i < data.Length; i += dataIncremation)
                 {
@@ -175,7 +157,7 @@ namespace Assets
                     waveBuffer.Add((float)BitConverter.ToInt64(tmp, 0));
                 }
             }
-            else if (inputBitRate == BitRate.Float)
+            else if (inputBitRate == BitRate.Floating32)
             {
                 for (int i = 0; i < data.Length; i += dataIncremation)
                 {
