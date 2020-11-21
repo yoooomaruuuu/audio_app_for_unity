@@ -76,6 +76,7 @@ namespace audio_app
                     if (double.IsNaN(value)) value = 0.0f;
                     gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, value / gageLevelSensi, 1);
                 }
+                //Debug.Log(samples[0]);
             }
             else
             {

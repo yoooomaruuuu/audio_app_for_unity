@@ -58,14 +58,15 @@ namespace audio_app
     #else
             if(isTouch)
             {
-                int jumpIndex = (int)(audioManajor.FFTSize * (jumpHz / (float)audioManajor.SamplingRate ));
-                float[] powerSp = audioManajor.PowerSpectre; 
-                float value = 0.0f;
-                for (int i = jumpIndex; i < audioManajor.FFTSize / 2; i++) value += powerSp[i];
-                value *= value * jumpSensitivity;
-                if(value > jumpForceLow)
+                // int jumpIndex = (int)(audioManajor.FFTSize * (jumpHz / (float)audioManajor.SamplingRate ));
+                // float[] powerSp = audioManajor.PowerSpectre; 
+                // float value = 0.0f;
+                // for (int i = jumpIndex; i < audioManajor.FFTSize / 2; i++) value += powerSp[i];
+                // value *= value * jumpSensitivity;
+                // if(value > jumpForceLow)
+                if(audioManajor.F0 > 500)
                  {
-                    this.rigid2D.AddForce(transform.up * Math.Min(value, jumpForceRaise) * 10); 
+                    this.rigid2D.AddForce(transform.up * Math.Min(100, jumpForceRaise) * 10); 
                  }
             }
      #endif
