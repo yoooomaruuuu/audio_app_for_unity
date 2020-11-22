@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using lib_audio_analysis;
 using audio_app.common;
+using TMPro;
 
 namespace audio_app
 {
@@ -15,11 +16,21 @@ namespace audio_app
         Dropdown bitsPerSampleList;
         Dropdown devicesList;
 
+        string descTextColor = "#1C2209";
+        string errorTextColor = "#ed4747";
+
+        [SerializeField]
+        private GameObject textObject;
+
+        TextMeshProUGUI descriptionText;
+
         InputCaptureFuncs inputCap;
 
         // Start is called before the first frame update
         void Start()
         {
+            descriptionText = textObject.GetComponent<TextMeshProUGUI>();
+
             appmanage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
             samplingRateList = canvas.transform.Find("SamplingRate").GetComponent<Dropdown>();
             channelList = canvas.transform.Find("Channel").GetComponent<Dropdown>();
@@ -29,6 +40,8 @@ namespace audio_app
             channelList.value = PlayerPrefs.GetInt("ch", 0);
             bitsPerSampleList.value = PlayerPrefs.GetInt("bps", 0);
             devicesList.value = PlayerPrefs.GetInt("device", 0);
+
+
             inputCap = appmanage.InputCap;
 
             for (int i = 0; i < inputCap.getInputDevicesListSize(); i++)
@@ -79,8 +92,57 @@ namespace audio_app
             }
             else
             {
-                Debug.Log("non selected device");
+                Color textColor = Color.red;
+                ColorUtility.TryParseHtmlString(errorTextColor, out textColor);
+                descriptionText.color = textColor;
+                descriptionText.text = "入力音声デバイスが選択されていません。";
             }
+        }
+
+        public void enterMouseDeviceDrop()
+        {
+            Color textColor = Color.black;
+            ColorUtility.TryParseHtmlString(descTextColor, out textColor);
+            descriptionText.color = textColor;
+            descriptionText.text = "入力音声デバイスの設定";
+        }
+        public void exitMouseDeviceDrop()
+        {
+            descriptionText.text = null;
+        }
+
+        public void enterMouseSrateDrop()
+        {
+            Color textColor = Color.black;
+            ColorUtility.TryParseHtmlString(descTextColor, out textColor);
+            descriptionText.color = textColor;
+            descriptionText.text = "デバイスのサンプリングレートの設定";
+        }
+        public void exitMouseSrateDrop()
+        {
+            descriptionText.text = null;
+        }
+        public void enterMouseChDrop()
+        {
+            Color textColor = Color.black;
+            ColorUtility.TryParseHtmlString(descTextColor, out textColor);
+            descriptionText.color = textColor;
+            descriptionText.text = "デバイスのチャンネルの設定";
+        }
+        public void exitMouseChDrop()
+        {
+            descriptionText.text = null;
+        }
+        public void enterMouseBpsDrop()
+        {
+            Color textColor = Color.black;
+            ColorUtility.TryParseHtmlString(descTextColor, out textColor);
+            descriptionText.color = textColor;
+            descriptionText.text = "デバイスのサンプルごとのビットレートの設定";
+        }
+        public void exitMouseBpsDrop()
+        {
+            descriptionText.text = null;
         }
 
         private void OnDestroy()
