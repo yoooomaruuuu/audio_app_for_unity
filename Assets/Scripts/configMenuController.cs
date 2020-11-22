@@ -68,7 +68,7 @@ namespace audio_app
                     uint.Parse(samplingRateList.captionText.text),
                     ushort.Parse(channelList.captionText.text),
                     bitRate,
-                    16,
+                    8,
                     devicesList.value - 1
                     );
                 PlayerPrefs.SetInt("s-rate", samplingRateList.value);

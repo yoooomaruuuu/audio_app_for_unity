@@ -3,20 +3,21 @@
 
 using UnityEngine;
 using System;
+using System.Linq;
 
 
 namespace audio_app
 {
     public class PlayerController : MonoBehaviour
     {
-        public bool debug = false;
+        public bool debug = true;
         public float jumpHz = 2000.0f;
 
         [SerializeField] private ContactFilter2D filter2d;
 
         AudioSensitivityController sensiController;
-        float jumpSensitivity = 1.0f;
-        float moveSensitivity = 2.0f;
+        float jumpSensitivity = 300.0f;
+        float moveSensitivity = 50.0f;
         GameObject audioSource;
         audioManajor audioManajor;
         Rigidbody2D rigid2D;
@@ -56,7 +57,7 @@ namespace audio_app
                 //this.gameObject.transform.Translate(0, 0.5f, 0);
              }
     #else
-            if(isTouch)
+            if(isTouch && this.rigid2D.velocity.y == 0.0f)
             {
                 // int jumpIndex = (int)(audioManajor.FFTSize * (jumpHz / (float)audioManajor.SamplingRate ));
                 // float[] powerSp = audioManajor.PowerSpectre; 
@@ -64,17 +65,17 @@ namespace audio_app
                 // for (int i = jumpIndex; i < audioManajor.FFTSize / 2; i++) value += powerSp[i];
                 // value *= value * jumpSensitivity;
                 // if(value > jumpForceLow)
-                if(audioManajor.F0 > 500)
+                if(audioManajor.F0 > jumpSensitivity)
                  {
-                    this.rigid2D.AddForce(transform.up * Math.Min(100, jumpForceRaise) * 10); 
+                    this.rigid2D.AddForce(transform.up * Math.Min(audioManajor.PowerSpectre.Max(), jumpForceRaise) * 20); 
                  }
             }
-     #endif
-     
-     #if DEBUG
+#endif
+
+#if DEBUG
             if (Input.GetKey(KeyCode.RightArrow))
-     #else
-            if(audioManajor.PowerSpectre[0] > moveSensitivity)
+#else
+            if(audioManajor.PowerSpectre.Max() > moveSensitivity)
      #endif
             {
                 if(!isWallTouch)
@@ -100,18 +101,18 @@ namespace audio_app
         {
             if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
             {
-                jumpSensitivity = 300.0f;
-                moveSensitivity = 0.01f;
+                //jumpSensitivity = 300.0f;
+                moveSensitivity = 12.0f;
             }
             else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM)
             {
-                jumpSensitivity = 3.0f;
-                moveSensitivity = 1.0f;
+                //jumpSensitivity = 3.0f;
+                moveSensitivity = 36.0f;
             }
             else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
             {
-                jumpSensitivity = 1.0f;
-                moveSensitivity = 2.0f;
+                //jumpSensitivity = 1.0f;
+                moveSensitivity = 48.0f;
             }
         }
     }

@@ -56,9 +56,9 @@ namespace audio_app
         // Update is called once per frame
         void Update()
         {
-            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 0.1f;
-            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 10.0f;
-            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 30.0f;
+            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 48.0f;
+            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 60.0f;
+            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 72.0f;
 
             if (DEBUG_FFT_WAVE)
             {
@@ -70,13 +70,14 @@ namespace audio_app
                     float value = 0.0f;
                     for (int j = 0; j < sampleNum; j++)
                     {
-                        value += samples[sampleNum * i + j];
+                        value = System.Math.Max(samples[sampleNum * i + j], value);
+                        //value += samples[sampleNum * i + j];
                     }
                     //test = test / (float)sampleNum;
-                    if (double.IsNaN(value)) value = 0.0f;
-                    gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, value / gageLevelSensi, 1);
+                    //if (double.IsInfinity(value)) value = 0.0f;
+                    value /= gageLevelSensi;
+                    gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, value, 1);
                 }
-                //Debug.Log(samples[0]);
             }
             else
             {

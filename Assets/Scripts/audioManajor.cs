@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using lib_audio_analysis;
 using System.Threading;
+using System.Threading.Tasks;
 using audio_app.common;
 using lib_world;
 
@@ -28,7 +29,7 @@ namespace audio_app
         ComplexData fftInput;
         ComplexData fftOutput;
         List<float> waveBuffer;
-        int frameBufferSize = 2048;
+        int frameBufferSize = 512;
         double typeMax;
 
         int captureBufferSize;
@@ -94,29 +95,28 @@ namespace audio_app
         }
         private async void capture()
         {
-            while(cap_stop)
+            while(true)
             {
-                long test = inputCap.getCaptureData(ref captureDataPtr);
+                long hr = inputCap.getCaptureData(ref captureDataPtr);
                 //if(test != 0) Debug.Log(test);
-                if(test == 0)
+                if (hr == 0)
                 {
                     Marshal.Copy(captureDataPtr, captureData, 0, captureBufferSize);
                     inputSoundDataConvert(captureData);
-                    //await Task.Delay(16);
-                    if(waveBuffer.Count > frameBufferSize)
+                    if (waveBuffer.Count > frameBufferSize)
                     {
-                        if(inputBitRate != BitRate.Floating32)
+                        if (inputBitRate != BitRate.Floating32)
                         {
                             float[] tmp = waveBuffer.GetRange(0, frameBufferSize).ToArray();
                             DataSamples = Array.ConvertAll(tmp, (x) => (float)(x / (double)typeMax));
                         }
                         else
                         {
-                            DataSamples =  waveBuffer.GetRange(0, frameBufferSize).ToArray();
+                            DataSamples = waveBuffer.GetRange(0, frameBufferSize).ToArray();
                         }
                         // fft
                         fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
-                        fftClass.fftRun(fftInput, fftOutput);
+                        //fftClass.fftRun(fftInput, fftOutput);
                         //calcPowerSpectre();
                         //f0estimate
                         double[] f0tmp = Array.ConvertAll(DataSamples, (x) => (double)x);
@@ -126,6 +126,11 @@ namespace audio_app
                         waveBuffer.RemoveRange(0, frameBufferSize);
                     }
                 }
+                else
+                {
+                    if(!cap_stop) break;
+                }
+                await Task.Delay(1);
             }
         }
 
@@ -142,7 +147,11 @@ namespace audio_app
         {
             for(int i=0; i<powerSpectre.Length; i++)
             {
-                powerSpectre[i] = (float)(Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0)) / FFTSize;
+                // 振幅のパワー計測 0以上にしたほうが扱いやすいため+60.0f
+                double t = Math.Pow(fftInput.Real[i], 2.0);
+                powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f) + 60.0f;
+                //double t = (Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0));
+                //powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f);
             }
         }
 
