@@ -75,7 +75,7 @@ namespace audio_app
 #if DEBUG
             if (Input.GetKey(KeyCode.RightArrow))
 #else
-            if(audioManajor.PowerSpectre.Max() > moveSensitivity)
+            if(audioManajor.InputDb > moveSensitivity)
      #endif
             {
                 if(!isWallTouch)

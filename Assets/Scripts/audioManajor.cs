@@ -32,6 +32,9 @@ namespace audio_app
         int frameBufferSize = 512;
         double typeMax;
 
+        float inputDb;
+        public float InputDb { get { calcDb(); return inputDb; } }
+
         int captureBufferSize;
         byte[] captureData;
         IntPtr captureDataPtr;
@@ -47,6 +50,7 @@ namespace audio_app
 
         void Start()
         {
+            inputDb = -60.0f;
             appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
             inputCap = appManage.InputCap;
 
@@ -120,7 +124,7 @@ namespace audio_app
                         }
                         // fft
                         fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
-                        //fftClass.fftRun(fftInput, fftOutput);
+                        fftClass.fftRun(fftInput, fftOutput);
                         //calcPowerSpectre();
                         //f0estimate
                         double[] f0tmp = Array.ConvertAll(DataSamples, (x) => (double)x);
@@ -141,7 +145,6 @@ namespace audio_app
 
         private void OnDestroy()
         {
-            Debug.Log("destroy manajor");
             cap_stop = false;
             rcv_wave_thread.Join();
             rcv_wave_thread = null;
@@ -152,16 +155,26 @@ namespace audio_app
             f0Class = null;
         }
 
+        private void calcDb()
+        {
+            inputDb = -60.0f;
+            for (int i = 0; i < powerSpectre.Length; i++)
+            {
+                double t = Math.Pow(fftInput.Real[i], 2.0);
+                inputDb = Math.Max((float)(10.0 * Math.Log10(t)), inputDb);
+            }
+            inputDb += 60.0f;
+        }
 
         private void calcPowerSpectre()
         {
             for(int i=0; i<powerSpectre.Length; i++)
             {
                 // 振幅のパワー計測 0以上にしたほうが扱いやすいため+60.0f
-                double t = Math.Pow(fftInput.Real[i], 2.0);
-                powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f) + 60.0f;
-                //double t = (Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0));
-                //powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f);
+                // double t = Math.Pow(fftInput.Real[i], 2.0);
+                // powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f) + 60.0f;
+                double t = (Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0));
+                powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f);// + 60.0f;
             }
         }
 

@@ -5,9 +5,9 @@ namespace audio_app
     public class audioGageControll : MonoBehaviour
     {
         [SerializeField]
-        int waveDisplayHz = 4000;
+        int waveDisplayHz = 8000;
         [SerializeField]
-        int gageNum = 10;
+        int gageNum = 15;
         [SerializeField]
         GameObject gagePrefab;
         [SerializeField]
@@ -56,8 +56,8 @@ namespace audio_app
         // Update is called once per frame
         void Update()
         {
-            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 48.0f;
-            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 60.0f;
+            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 24.0f;
+            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 48.0f;
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 72.0f;
 
             if (DEBUG_FFT_WAVE)
