@@ -22,7 +22,7 @@ namespace audio_app
         audioManajor audioManajor;
         Rigidbody2D rigid2D;
         float walkSpeed = 0.07f;
-        float jumpForceLow = 20.0f;
+        //float jumpForceLow = 20.0f;
         float jumpForceRaise = 30.0f;
 
         private Animator animator;
@@ -99,7 +99,7 @@ namespace audio_app
         // Update is called once per frame
         void Update()
         {
-            if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
+            if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
             {
                 //jumpSensitivity = 300.0f;
                 moveSensitivity = 12.0f;
@@ -109,11 +109,17 @@ namespace audio_app
                 //jumpSensitivity = 3.0f;
                 moveSensitivity = 36.0f;
             }
-            else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
+            else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
             {
                 //jumpSensitivity = 1.0f;
                 moveSensitivity = 48.0f;
             }
+        }
+
+        private void OnDestroy()
+        {
+            sensiController = null;
+            audioManajor = null;
         }
     }
 }

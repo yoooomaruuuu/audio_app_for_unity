@@ -21,5 +21,10 @@ namespace audio_app
         {
             playerController.IsWallTouch = false;
         }
+
+        private void OnDestroy()
+        {
+            playerController = null;
+        }
     }
 }

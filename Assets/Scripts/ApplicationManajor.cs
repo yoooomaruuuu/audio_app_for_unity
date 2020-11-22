@@ -35,7 +35,7 @@ namespace audio_app
         {
             DontDestroyOnLoad(this);
             //初期値
-            AppConfig = new Config(48000, 2, BitRate.Integer16, 16, 0);
+            AppConfig = new Config(48000, 2, BitRate.Integer16, 8, 0);
             InputCap = new InputCaptureFuncs();
             SceneManager.LoadScene("MainMenu");
         }

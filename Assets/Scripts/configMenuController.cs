@@ -83,5 +83,11 @@ namespace audio_app
             }
         }
 
+        private void OnDestroy()
+        {
+            inputCap = null;
+            appmanage = null;
+        }
+
     }
 }

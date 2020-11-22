@@ -24,5 +24,11 @@ namespace audio_app
             if (goal.IsPlayerTouch) appmanage.gameEnd();
         }
 
+        private void OnDestroy()
+        {
+            appmanage = null;
+            goal = null;
+        }
+
     }
 }

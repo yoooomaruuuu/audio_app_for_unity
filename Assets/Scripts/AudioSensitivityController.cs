@@ -9,24 +9,26 @@ namespace audio_app
         Dropdown sensiList;
         public enum Sensitivity
         {
-            STRONG = 0,
+            WEAK = 0,
             MEDIUM = 1,
-            WEAK = 2
+            STRONG = 2
         }
 
-        private Sensitivity _sensi;
-        public Sensitivity Sensi { get { return _sensi; } }
+        private Sensitivity sensi;
+        public Sensitivity Sensi { get { return sensi; } }
         // Start is called before the first frame update
         void Start()
         {
             sensiList = canvas.transform.Find("Sensitivity").GetComponent<Dropdown>();
             sensiList.onValueChanged.AddListener(delegate { sensiListValueChanged(sensiList); });
-            _sensi = Sensitivity.STRONG;
+            sensi = (Sensitivity)PlayerPrefs.GetInt("sensitivity", 0);
+            //sensi = Sensitivity.STRONG;
         }
 
         void sensiListValueChanged(Dropdown change)
         {
-            _sensi = (Sensitivity)change.value;
+            sensi = (Sensitivity)change.value;
+            PlayerPrefs.SetInt("sensitivity", (int)sensi);
         }
 
     }

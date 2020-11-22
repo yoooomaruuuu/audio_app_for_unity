@@ -50,6 +50,14 @@ namespace audio_app
             appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
             inputCap = appManage.InputCap;
 
+            cap_stop = false;
+            long hr = inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
+            if (hr != 0) appManage.error();
+            Debug.Log("initInputCapture");
+            SamplingRate = appManage.AppConfig.SamplingRate;
+            inputChannels = appManage.AppConfig.Channels;
+            inputBitRate = appManage.AppConfig.BitsPerSample;
+
             waveBuffer = new List<float>();
             DataSamples = new float[frameBufferSize];
             fftInput.Real = new float[frameBufferSize];
@@ -59,12 +67,7 @@ namespace audio_app
             powerSpectre = new float[frameBufferSize];
             fftClass = new FFTFuncs(frameBufferSize, frameBufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
-
-            cap_stop = false;
-            inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
-            SamplingRate = appManage.AppConfig.SamplingRate;
-            inputChannels = appManage.AppConfig.Channels;
-            inputBitRate = appManage.AppConfig.BitsPerSample;
+            Debug.Log("fftfuncsinit");
 
             double f0FramePeriod = Math.Ceiling(frameBufferSize / (double)SamplingRate) * 1000.0;
             f0Class = new F0EstimateFuncs(f0FramePeriod, 40, 2000);
@@ -89,6 +92,7 @@ namespace audio_app
             {
                 appManage.error();
             }
+            Debug.Log("capture start");
             rcv_wave_thread = new Thread(new ThreadStart(capture));
             rcv_wave_thread.Start();
             cap_stop = true;
@@ -128,7 +132,8 @@ namespace audio_app
                 }
                 else
                 {
-                    if(!cap_stop) break;
+                    if(!cap_stop) 
+                        break;
                 }
                 await Task.Delay(1);
             }
@@ -136,10 +141,15 @@ namespace audio_app
 
         private void OnDestroy()
         {
+            Debug.Log("destroy manajor");
             cap_stop = false;
             rcv_wave_thread.Join();
             rcv_wave_thread = null;
             inputCap.stopCapture();
+            appManage = null;
+            inputCap = null;
+            fftClass = null;
+            f0Class = null;
         }
 
 

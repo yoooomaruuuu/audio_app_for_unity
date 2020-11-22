@@ -56,9 +56,9 @@ namespace audio_app
         // Update is called once per frame
         void Update()
         {
-            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 48.0f;
+            if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 48.0f;
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 60.0f;
-            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 72.0f;
+            else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 72.0f;
 
             if (DEBUG_FFT_WAVE)
             {
@@ -88,6 +88,11 @@ namespace audio_app
                     y[i] = yLength * samples[i] / 2.0f;
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            audioData = null;
         }
     }
 }
