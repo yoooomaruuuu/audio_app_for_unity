@@ -35,7 +35,7 @@ namespace audio_app
         void Start()
         {
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
-            audioSource = GameObject.Find("NAudioData");
+            audioSource = GameObject.Find("AudioManager");
             AudioManager = audioSource.GetComponent<AudioManager>();
             rigid2D = GetComponent<Rigidbody2D>();
 

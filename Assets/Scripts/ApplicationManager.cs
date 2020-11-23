@@ -39,6 +39,11 @@ namespace audio_app
             InputCap = new InputCaptureFuncs();
             SceneManager.LoadScene("MainMenu");
         }
+        public void gameDescription()
+        {
+            SceneManager.LoadScene("Description");
+        }
+
         public void configSetting()
         {
             SceneManager.LoadScene("ConfigMenu");
@@ -72,6 +77,15 @@ namespace audio_app
         public void error()
         {
             SceneManager.LoadScene("ErrorDialog");
+        }
+
+        public void gameQuit()
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_STANDALONE
+            UnityEngine.Application.Quit();
+#endif        
         }
     }
 }

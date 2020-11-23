@@ -41,7 +41,6 @@ namespace audio_app
 
         double[] f0Array;
         public double F0 { get; private set; }
-        int f0Size;
         double[] f0TemporalPosition;
 
         bool cap_stop;
