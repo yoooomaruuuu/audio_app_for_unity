@@ -1,21 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class GoalPost : MonoBehaviour
+namespace audio_app
 {
-    bool isPlayerTouch = false;
-
-    private void OnTriggerEnter2D(Collider2D collision)
+    public class GoalPost : MonoBehaviour
     {
-        if (collision.gameObject.CompareTag("Player")) isPlayerTouch = true;
-    }
+        bool isPlayerTouch = false;
+        public bool IsPlayerTouch
+        {
+            get { return isPlayerTouch; }
+        }
 
-    public bool getIsPlayerTouch()
-    {
-        return isPlayerTouch;
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (collision.gameObject.CompareTag("Player")) isPlayerTouch = true;
+        }
     }
 }

@@ -1,106 +1,114 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿#define DEBUG
+#undef DEBUG
+
 using UnityEngine;
-
-using UnityEngine.UI;
-using Assets;
 using System;
+using System.Linq;
 
 
-public class PlayerController : MonoBehaviour
+namespace audio_app
 {
-    public bool debug = false;
-    public float jumpHz = 2000.0f;
-
-    [SerializeField] private ContactFilter2D filter2d;
-
-    GameObject audioSource;
-    audioManajor audioManajor;
-    Rigidbody2D rigid2D;
-    float walkSpeed = 0.07f;
-    //private Sprite stateSprite;
-    //private Sprite runSprite;
-    //private SpriteRenderer spriteRenderer;
-
-    private Animator animator;
-
-    GameObject camera;
-    GameObject gage;
-
-    bool isWallTouch = false;
-
-    // Start is called before the first frame update
-    void Start()
+    public class PlayerController : MonoBehaviour
     {
-        audioSource = GameObject.Find("NAudioData");
-        audioManajor = audioSource.GetComponent<audioManajor>();
-        rigid2D = GetComponent<Rigidbody2D>();
-        //stateSprite = Resources.Load<Sprite>("player_state");
-        //runSprite = Resources.Load<Sprite>("player_run");
-        //spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
+        public bool debug = true;
+        public float jumpHz = 2000.0f;
 
-        camera = GameObject.Find("MainCamera");
-        gage = GameObject.Find("gageController");
+        [SerializeField] private ContactFilter2D filter2d;
 
-        animator = GetComponent<Animator>();
-    }
+        AudioSensitivityController sensiController;
+        float jumpSensitivity = 300.0f;
+        float moveSensitivity = 50.0f;
+        GameObject audioSource;
+        AudioManager AudioManager;
+        Rigidbody2D rigid2D;
+        float walkSpeed = 0.07f;
+        float jumpForceRaise = 30.0f;
 
-    private void FixedUpdate()
-    {
-        bool isTouch = rigid2D.IsTouching(filter2d);
-#if false
-         if(Input.GetKey(KeyCode.Space) && isTouch)
-         {
-            rigid2D.AddForce(transform.up * 500); 
-            //this.gameObject.transform.Translate(0, 0.5f, 0);
-         }
-#else
-        if(isTouch)
+        private Animator animator;
+
+        GameObject camera;
+        GameObject gage;
+
+        bool isWallTouch = false;
+        public bool IsWallTouch { set { this.isWallTouch = value; } }
+
+        void Start()
         {
-            int jumpIndex = (int)(audioManajor.getFFTSize() * (jumpHz / (float)audioManajor.getSamplingRate() ));
-            float tmp = 0.0f;
-            for (int i = jumpIndex; i < audioManajor.getFFTSize() / 2; i++) tmp += audioManajor.getPowerSpectre()[i];
-            if(tmp > 20.0f)
+            sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
+            audioSource = GameObject.Find("NAudioData");
+            AudioManager = audioSource.GetComponent<AudioManager>();
+            rigid2D = GetComponent<Rigidbody2D>();
+
+            camera = GameObject.Find("MainCamera");
+            gage = GameObject.Find("gageController");
+
+            animator = GetComponent<Animator>();
+        }
+
+        private void FixedUpdate()
+        {
+            bool isTouch = rigid2D.IsTouching(filter2d);
+    #if DEBUG
+             if(Input.GetKey(KeyCode.Space) && isTouch)
              {
-                this.rigid2D.AddForce(transform.up * Math.Min(tmp, 30.0f) * 10); 
+                rigid2D.AddForce(transform.up * 500); 
                 //this.gameObject.transform.Translate(0, 0.5f, 0);
              }
-        }
- #endif
- 
- #if false
-        if (Input.GetKey(KeyCode.RightArrow))
- #else
-        if(audioManajor.getPowerSpectre()[0] > 2.0f)
- #endif
-        {
-            if(!isWallTouch)
+    #else
+            if(isTouch && this.rigid2D.velocity.y == 0.0f)
             {
-                this.gameObject.transform.Translate(walkSpeed, 0, 0);
-                camera.transform.Translate(walkSpeed, 0, 0);
-                gage.transform.Translate(walkSpeed, 0, 0);
+                if(AudioManager.F0 > jumpSensitivity)
+                 {
+                    this.rigid2D.AddForce(transform.up * Math.Min(AudioManager.PowerSpectre.Max(), jumpForceRaise) * 20); 
+                 }
             }
-            animator.SetTrigger("Run");
-            //spriteRenderer.sprite = runSprite;
-        }
-        else
-        {
-            //spriteRenderer.sprite = stateSprite;
-            animator.SetTrigger("State");
-        }
-        if(debug)
-        {
-            if (Input.GetKey(KeyCode.LeftArrow)) this.gameObject.transform.Translate(-1.0f * walkSpeed, 0, 0);;
-        }
-    }
+#endif
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
-    
-    public void setIsWallTouch(bool flg)
-    {
-        isWallTouch = flg;
+#if DEBUG
+            if (Input.GetKey(KeyCode.RightArrow))
+#else
+            if(AudioManager.InputDb > moveSensitivity)
+     #endif
+            {
+                if(!isWallTouch)
+                {
+                    this.gameObject.transform.Translate(walkSpeed, 0, 0);
+                    camera.transform.Translate(walkSpeed, 0, 0);
+                    gage.transform.Translate(walkSpeed, 0, 0);
+                }
+                animator.SetTrigger("Run");
+            }
+            else
+            {
+                animator.SetTrigger("State");
+            }
+            if(debug)
+            {
+                if (Input.GetKey(KeyCode.LeftArrow)) this.gameObject.transform.Translate(-1.0f * walkSpeed, 0, 0);;
+            }
+        }
+
+        void Update()
+        {
+            if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
+            {
+                moveSensitivity = 12.0f;
+            }
+            else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM)
+            {
+                moveSensitivity = 36.0f;
+            }
+            else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
+            {
+                moveSensitivity = 48.0f;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            sensiController = null;
+            AudioManager = null;
+        }
     }
 }
+

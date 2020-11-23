@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.IO;
 
 
 namespace lib_audio_analysis
@@ -22,7 +20,7 @@ namespace lib_audio_analysis
         static extern int get_input_devices_list_size(IntPtr func_object);
 
         [DllImport("lib_audio_analysis", EntryPoint = "init_input_capture", CallingConvention = CallingConvention.StdCall)]
-        static extern void init_input_capture(UInt32 sample_rate, UInt16 channels, UInt16 bits_per_sample, Int32 frame_ms, int device_index, IntPtr func_object);
+        static extern long init_input_capture(UInt32 sample_rate, UInt16 channels, UInt16 bits_per_sample, Int32 frame_ms, int device_index, IntPtr func_object);
 
         [DllImport("lib_audio_analysis", EntryPoint = "get_buf_size", CallingConvention = CallingConvention.StdCall)]
         static extern int get_buf_size(IntPtr func_object);
@@ -36,53 +34,52 @@ namespace lib_audio_analysis
         [DllImport("lib_audio_analysis", EntryPoint = "stop", CallingConvention = CallingConvention.StdCall)]
         static extern long stop(IntPtr func_object);
 
-        IntPtr inputCap;
+        private IntPtr mInputCap;
 
         public InputCaptureFuncs()
         {
-            inputCap = new IntPtr();
-            create_input_capture(ref inputCap);
+            mInputCap = new IntPtr();
+            create_input_capture(ref mInputCap);
         }
 
         ~InputCaptureFuncs()
         {
-            delete_input_capture(ref inputCap);
+            delete_input_capture(ref mInputCap);
         }
 
-
-        public void initInputCapture(UInt32 sampleRate, UInt16 channels, UInt16 bitsPerSample, Int32 frameMs, int deviceIndex)
+        public long initInputCapture(UInt32 sampleRate, UInt16 channels, UInt16 bitsPerSample, Int32 frameMs, int deviceIndex)
         {
-            init_input_capture(sampleRate, channels, bitsPerSample, frameMs, deviceIndex, inputCap);
+            return init_input_capture(sampleRate, channels, bitsPerSample, frameMs, deviceIndex, mInputCap);
         }
 
         public long startCapture()
         {
-            return start(inputCap);
+            return start(mInputCap);
         }
 
         public long getCaptureData(ref IntPtr data)
         {
-            return caputre_data(ref data, inputCap);
+            return caputre_data(ref data, mInputCap);
         }
 
         public long stopCapture()
         {
-            return stop(inputCap);
+            return stop(mInputCap);
         }
 
         public int getDataBufferSize()
         {
-            return get_buf_size(inputCap);
+            return get_buf_size(mInputCap);
         }
 
         public void getInputDevicesList(int index, StringBuilder tmp)
         {
-            get_input_devices_list(index, tmp, inputCap);
+            get_input_devices_list(index, tmp, mInputCap);
         }
 
         public int getInputDevicesListSize()
         {
-            return get_input_devices_list_size(inputCap);
+            return get_input_devices_list_size(mInputCap);
         }
     }
 }

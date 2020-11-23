@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3388495753301666796}
   - component: {fileID: 1208175804991644847}
   m_Layer: 0
-  m_Name: audioGage
+  m_Name: AudioGage
   m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -70,7 +70,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 4a1285d8dec0ba64db131b49da0b02d4, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.22352941}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
