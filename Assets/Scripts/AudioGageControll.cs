@@ -15,7 +15,7 @@ namespace audio_app
         [SerializeField]
         bool DEBUG_FFT_WAVE = true;
 
-        AudioManager audioData;
+        AudioManager audioManager;
         Camera cam;
 
         GameObject[] gages;
@@ -42,8 +42,8 @@ namespace audio_app
             inActiveGageColor = new Color(0, 0, 1, 0.3f);
 
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
-            audioData = GameObject.Find("NAudioData").GetComponent<AudioManager>();
-            fftSize = audioData.FFTSize;
+            audioManager = GameObject.Find("AudioManager").GetComponent<AudioManager>();
+            fftSize = audioManager.FFTSize;
             x = new float[fftSize];
             y = new float[fftSize];
 
@@ -77,8 +77,8 @@ namespace audio_app
 
             if (DEBUG_FFT_WAVE)
             {
-                samples = audioData.PowerSpectre;
-                viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioData.SamplingRate);
+                samples = audioManager.PowerSpectre;
+                viewIndex = (int)System.Math.Floor(waveDisplayHz * fftSize / (float)audioManager.SamplingRate);
                 int sampleNum = viewIndex / gageNum;
                 for (int i = 0; i < gageNum; i++)
                 {
@@ -93,7 +93,7 @@ namespace audio_app
             }
             else
             {
-                samples = audioData.DataSamples;
+                samples = audioManager.DataSamples;
                 for (int i = 0; i < fftSize; i++)
                 {
                     x[i] = xLength * i / (float)fftSize - (xLength / 2.0f);
@@ -104,7 +104,7 @@ namespace audio_app
 
         private void OnDestroy()
         {
-            audioData = null;
+            audioManager = null;
         }
 
         public void gagesActive()
