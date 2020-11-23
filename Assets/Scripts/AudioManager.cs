@@ -11,9 +11,9 @@ using lib_world;
 
 namespace audio_app
 {
-    class audioManajor : MonoBehaviour
+    class AudioManager : MonoBehaviour
     {
-        ApplicationManajor appManage;
+        ApplicationManager appManage;
         InputCaptureFuncs inputCap;
         FFTFuncs fftClass;
         F0EstimateFuncs f0Class;
@@ -51,7 +51,7 @@ namespace audio_app
         void Start()
         {
             inputDb = -60.0f;
-            appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
+            appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManager>();
             inputCap = appManage.InputCap;
 
             cap_stop = false;

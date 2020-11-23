@@ -7,10 +7,10 @@ using TMPro;
 
 namespace audio_app
 {
-    public class configMenuController : MonoBehaviour
+    public class ConfigMenuController : MonoBehaviour
     {
         public Canvas canvas;
-        ApplicationManajor appmanage;
+        ApplicationManager appmanage;
         Dropdown samplingRateList;
         Dropdown channelList;
         Dropdown bitsPerSampleList;
@@ -31,7 +31,7 @@ namespace audio_app
         {
             descriptionText = textObject.GetComponent<TextMeshProUGUI>();
 
-            appmanage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
+            appmanage = GameObject.Find("SceneManajor").GetComponent<ApplicationManager>();
             samplingRateList = canvas.transform.Find("SamplingRate").GetComponent<Dropdown>();
             channelList = canvas.transform.Find("Channel").GetComponent<Dropdown>();
             bitsPerSampleList = canvas.transform.Find("BitsPerSample").GetComponent<Dropdown>();
@@ -77,7 +77,7 @@ namespace audio_app
                 {
                     bitRate = BitRate.Floating32;
                 }
-                appmanage.AppConfig = new ApplicationManajor.Config(
+                appmanage.AppConfig = new ApplicationManager.Config(
                     uint.Parse(samplingRateList.captionText.text),
                     ushort.Parse(channelList.captionText.text),
                     bitRate,

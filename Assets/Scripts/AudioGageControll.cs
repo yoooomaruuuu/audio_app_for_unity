@@ -2,7 +2,7 @@
 
 namespace audio_app
 {
-    public class audioGageControll : MonoBehaviour
+    public class AudioGageControll : MonoBehaviour
     {
         [SerializeField]
         int waveDisplayHz = 8000;
@@ -15,7 +15,7 @@ namespace audio_app
         [SerializeField]
         bool DEBUG_FFT_WAVE = true;
 
-        audioManajor audioData;
+        AudioManager audioData;
         Camera cam;
 
         GameObject[] gages;
@@ -36,7 +36,7 @@ namespace audio_app
         void Start()
         {
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
-            audioData = GameObject.Find("NAudioData").GetComponent<audioManajor>();
+            audioData = GameObject.Find("NAudioData").GetComponent<AudioManager>();
             fftSize = audioData.FFTSize;
             x = new float[fftSize];
             y = new float[fftSize];

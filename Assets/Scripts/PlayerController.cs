@@ -19,7 +19,7 @@ namespace audio_app
         float jumpSensitivity = 300.0f;
         float moveSensitivity = 50.0f;
         GameObject audioSource;
-        audioManajor audioManajor;
+        AudioManager AudioManager;
         Rigidbody2D rigid2D;
         float walkSpeed = 0.07f;
         float jumpForceRaise = 30.0f;
@@ -36,7 +36,7 @@ namespace audio_app
         {
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
             audioSource = GameObject.Find("NAudioData");
-            audioManajor = audioSource.GetComponent<audioManajor>();
+            AudioManager = audioSource.GetComponent<AudioManager>();
             rigid2D = GetComponent<Rigidbody2D>();
 
             camera = GameObject.Find("MainCamera");
@@ -57,9 +57,9 @@ namespace audio_app
     #else
             if(isTouch && this.rigid2D.velocity.y == 0.0f)
             {
-                if(audioManajor.F0 > jumpSensitivity)
+                if(AudioManager.F0 > jumpSensitivity)
                  {
-                    this.rigid2D.AddForce(transform.up * Math.Min(audioManajor.PowerSpectre.Max(), jumpForceRaise) * 20); 
+                    this.rigid2D.AddForce(transform.up * Math.Min(AudioManager.PowerSpectre.Max(), jumpForceRaise) * 20); 
                  }
             }
 #endif
@@ -67,7 +67,7 @@ namespace audio_app
 #if DEBUG
             if (Input.GetKey(KeyCode.RightArrow))
 #else
-            if(audioManajor.InputDb > moveSensitivity)
+            if(AudioManager.InputDb > moveSensitivity)
      #endif
             {
                 if(!isWallTouch)
@@ -107,7 +107,7 @@ namespace audio_app
         private void OnDestroy()
         {
             sensiController = null;
-            audioManajor = null;
+            AudioManager = null;
         }
     }
 }

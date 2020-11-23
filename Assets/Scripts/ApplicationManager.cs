@@ -6,7 +6,7 @@ using audio_app.common;
 
 namespace audio_app
 {
-    public class ApplicationManajor : MonoBehaviour
+    public class ApplicationManager : MonoBehaviour
     {
         public struct Config
         {

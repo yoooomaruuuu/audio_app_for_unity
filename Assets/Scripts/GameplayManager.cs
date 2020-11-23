@@ -2,16 +2,16 @@
 
 namespace audio_app
 {
-    public class GameplayManajor : MonoBehaviour
+    public class GameplayManager : MonoBehaviour
     {
-        ApplicationManajor appmanage;
+        ApplicationManager appmanage;
         GameObject player;
         GoalPost goal;
         // Start is called before the first frame update
         void Start()
         {
             player = GameObject.Find("player");
-            appmanage = GameObject.Find("SceneManajor").GetComponent<ApplicationManajor>();
+            appmanage = GameObject.Find("SceneManajor").GetComponent<ApplicationManager>();
             goal = GameObject.Find("goal").GetComponent<GoalPost>();
         }
 
