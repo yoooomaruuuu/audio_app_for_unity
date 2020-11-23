@@ -116,7 +116,7 @@ MonoBehaviour:
   m_MinSize: {x: 917, y: 348}
   m_MaxSize: {x: 22012, y: 10024}
   vertical: 0
-  controlID: 69
+  controlID: 32
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -141,7 +141,7 @@ MonoBehaviour:
   m_MinSize: {x: 202, y: 348}
   m_MaxSize: {x: 4002, y: 8048}
   vertical: 1
-  controlID: 126
+  controlID: 13
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -834,23 +834,23 @@ MonoBehaviour:
   m_SceneHierarchy:
     m_TreeViewState:
       scrollPos: {x: 0, y: 0}
-      m_SelectedIDs: 9c0f0000
+      m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 96b9ffffbebdffff28c2ffffdcfaffff6efbffff7efbffffd6fbfffff62e0000222f00006e2f00003c30000046300000763000002e650000ea730000
+      m_ExpandedIDs: 50f8ffff62f8ffffd6f9ffffeef9ffff86faffffa0faffffb8faffffbefaffffc2faffffbefbffff
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: BitsPerSample
-        m_OriginalName: BitsPerSample
+        m_Name: 
+        m_OriginalName: 
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
           y: 0
           width: 0
           height: 0
-        m_UserData: 12358
+        m_UserData: 0
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 0
+        m_OriginalEventType: 11
         m_IsRenamingFilename: 0
         m_ClientGUIView: {fileID: 9}
       m_SearchString: 
@@ -898,20 +898,20 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/Scenes
+    - Assets/Plugins
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/Scenes
+  - Assets/Plugins
   m_LastFoldersGridSize: 16
   m_LastProjectPath: D:\ProductionRelated\Unity\audio_app
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 220f0000
-    m_LastClickedID: 3874
-    m_ExpandedIDs: 00000000fe090000540a0000660b0000c00b0000500c0000840c0000360d0000580d0000ce0f0000b22d000000ca9a3b
+    m_SelectedIDs: 7a0d0000
+    m_LastClickedID: 3450
+    m_ExpandedIDs: 000000000e0a0000640a0000760b0000d00b0000660c00009a0c0000520d0000740d00007a0d0000ea0f0000c62d000000ca9a3b
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -939,7 +939,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000fe090000540a0000c00b0000500c0000840c0000ce0f0000b22d0000
+    m_ExpandedIDs: 000000000e0a0000640a0000760b0000d00b0000660c00009a0c0000520d0000740d0000ea0f0000c62d0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -967,7 +967,7 @@ MonoBehaviour:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
     m_HadKeyboardFocusLastEvent: 1
-    m_ExpandedInstanceIDs: 703200001a12000098290000b6170000a8370000b43700008c270000beecffff22d4ffff3ac1ffff00000000642e0000c63cffffa845feff380a0000
+    m_ExpandedInstanceIDs: 703200001a12000098290000b6170000a8370000b43700008c270000beecffff22d4ffff3ac1ffff00000000642e0000c63cffffa845feff380a0000ca290000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 

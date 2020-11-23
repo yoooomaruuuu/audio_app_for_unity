@@ -24,7 +24,7 @@ namespace audio_app
         BitRate inputBitRate;
         public float[] DataSamples { get; private set; }
         float[] powerSpectre;
-        public float[] PowerSpectre { get { calcPowerSpectre(); return powerSpectre; } }
+        public float[] PowerSpectre { get {  return powerSpectre; } }
         public int FFTSize { get { return fftClass.getFFTSize(); } }
         ComplexData fftInput;
         ComplexData fftOutput;
@@ -33,7 +33,7 @@ namespace audio_app
         double typeMax;
 
         float inputDb;
-        public float InputDb { get { calcDb(); return inputDb; } }
+        public float InputDb { get { return inputDb; } }
 
         int captureBufferSize;
         byte[] captureData;
@@ -57,7 +57,6 @@ namespace audio_app
             cap_stop = false;
             long hr = inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
             if (hr != 0) appManage.error();
-            Debug.Log("initInputCapture");
             SamplingRate = appManage.AppConfig.SamplingRate;
             inputChannels = appManage.AppConfig.Channels;
             inputBitRate = appManage.AppConfig.BitsPerSample;
@@ -71,7 +70,6 @@ namespace audio_app
             powerSpectre = new float[frameBufferSize];
             fftClass = new FFTFuncs(frameBufferSize, frameBufferSize);
             fftClass.setFFTMode(FFTFuncs.fftMode.FFT);
-            Debug.Log("fftfuncsinit");
 
             double f0FramePeriod = Math.Ceiling(frameBufferSize / (double)SamplingRate) * 1000.0;
             f0Class = new F0EstimateFuncs(f0FramePeriod, 40, 2000);
@@ -96,7 +94,6 @@ namespace audio_app
             {
                 appManage.error();
             }
-            Debug.Log("capture start");
             rcv_wave_thread = new Thread(new ThreadStart(capture));
             rcv_wave_thread.Start();
             cap_stop = true;
@@ -106,7 +103,6 @@ namespace audio_app
             while(true)
             {
                 long hr = inputCap.getCaptureData(ref captureDataPtr);
-                //if(test != 0) Debug.Log(test);
                 if (hr == 0)
                 {
                     Marshal.Copy(captureDataPtr, captureData, 0, captureBufferSize);
@@ -125,7 +121,8 @@ namespace audio_app
                         // fft
                         fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
                         fftClass.fftRun(fftInput, fftOutput);
-                        //calcPowerSpectre();
+                        calcPowerSpectre();
+                        calcDb();
                         //f0estimate
                         double[] f0tmp = Array.ConvertAll(DataSamples, (x) => (double)x);
                         f0Class.HarvestExecute(f0tmp, f0tmp.Length, (int)SamplingRate, f0TemporalPosition, f0Array);
@@ -139,7 +136,7 @@ namespace audio_app
                     if(!cap_stop) 
                         break;
                 }
-                await Task.Delay(1);
+                await Task.Delay(2);
             }
         }
 

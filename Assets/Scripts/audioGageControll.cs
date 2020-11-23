@@ -11,12 +11,16 @@ namespace audio_app
         [SerializeField]
         GameObject gagePrefab;
         [SerializeField]
+        GameObject player;
+        [SerializeField]
         bool DEBUG_FFT_WAVE = true;
 
         audioManajor audioData;
         Camera cam;
 
         GameObject[] gages;
+        SpriteRenderer[] gagesRenderer;
+        bool gagesActivation = false;
         float gageInterval = 0;
 
         int xLength = 0;
@@ -42,6 +46,7 @@ namespace audio_app
             yLength = (int)cam.ViewportToWorldPoint(new Vector3(1, 1, 0)).y * 2;
 
             gages = new GameObject[gageNum];
+            gagesRenderer = new SpriteRenderer[gageNum];
             float stan = ((float)xLength - ((gageNum - 1) * gageInterval)) / gageNum;
             float sizeE = stan / xLength;
             for (int i = 0; i < gageNum; i++)
@@ -50,6 +55,7 @@ namespace audio_app
                 gages[i].transform.position = new Vector3(stan * i + stan / 2.0f - xLength / 2.0f, 0, -1);
                 gages[i].transform.localScale = new Vector3(sizeE, 1, 1);
                 gages[i].transform.SetParent(this.gameObject.transform);
+                gagesRenderer[i] = gages[i].GetComponent<SpriteRenderer>();
             }
         }
 
@@ -59,6 +65,11 @@ namespace audio_app
             if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 24.0f;
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 48.0f;
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 72.0f;
+
+            if (player.GetComponent<Rigidbody2D>().velocity.y != 0.0) gagesActive(0.4f);
+            else if (player.GetComponent<Rigidbody2D>().velocity.x != 0.0) gagesActive(0.3f);
+            else gagesInActive(0.2f);
+             
 
             if (DEBUG_FFT_WAVE)
             {
@@ -93,6 +104,29 @@ namespace audio_app
         private void OnDestroy()
         {
             audioData = null;
+        }
+
+        public void gagesActive(float pow)
+        {
+            if (!gagesActivation)
+            {
+                for (int i = 0; i < gageNum; i++)
+                {
+                    gagesRenderer[i].color = new Color(1, 1, 1, pow);
+                }
+                gagesActivation = true;
+            }
+        }
+        public void gagesInActive(float pow)
+        {
+            if(gagesActivation)
+            {
+                for(int i=0; i<gageNum; i++)
+                {
+                    gagesRenderer[i].color = new Color(1, 1, 1, pow);
+                }
+                gagesActivation = false;
+            }
         }
     }
 }
