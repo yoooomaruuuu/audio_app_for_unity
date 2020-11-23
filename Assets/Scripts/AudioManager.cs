@@ -137,8 +137,8 @@ namespace audio_app
                     if(!cap_stop) 
                         break;
                 }
-                //自環境で試した結果、2フレの遅延を入れることで音声取得がスムーズに行ったため
-                await Task.Delay(2);
+                //自環境で試した結果、1フレの遅延を入れることで音声取得がスムーズに行ったため
+                await Task.Delay(1);
             }
         }
 

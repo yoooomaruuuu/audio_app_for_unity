@@ -21,6 +21,7 @@ namespace audio_app
             sensiList = canvas.transform.Find("Sensitivity").GetComponent<Dropdown>();
             sensiList.onValueChanged.AddListener(delegate { sensiListValueChanged(sensiList); });
             sensi = (Sensitivity)PlayerPrefs.GetInt("sensitivity", 0);
+            sensiList.value = (int)sensi;
         }
 
         void sensiListValueChanged(Dropdown change)

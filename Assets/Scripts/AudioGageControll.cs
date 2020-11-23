@@ -31,10 +31,16 @@ namespace audio_app
         int fftSize;
         int viewIndex = 0;
 
+        Color activeGageColor;
+        Color inActiveGageColor;
+
         AudioSensitivityController sensiController;
         float gageLevelSensi = 30.0f;
         void Start()
         {
+            activeGageColor = new Color(1, 1, 1, 0.3f);
+            inActiveGageColor = new Color(0, 0, 1, 0.3f);
+
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
             audioData = GameObject.Find("NAudioData").GetComponent<AudioManager>();
             fftSize = audioData.FFTSize;
@@ -65,9 +71,8 @@ namespace audio_app
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM) gageLevelSensi = 48.0f;
             else if (sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK) gageLevelSensi = 72.0f;
 
-            if (player.GetComponent<Rigidbody2D>().velocity.y != 0.0) gagesActive(0.4f);
-            else if (player.GetComponent<Rigidbody2D>().velocity.x != 0.0) gagesActive(0.3f);
-            else gagesInActive(0.2f);
+            if (player.GetComponent<Rigidbody2D>().velocity.x != 0.0) gagesActive();
+            else gagesInActive();
              
 
             if (DEBUG_FFT_WAVE)
@@ -102,24 +107,24 @@ namespace audio_app
             audioData = null;
         }
 
-        public void gagesActive(float pow)
+        public void gagesActive()
         {
             if (!gagesActivation)
             {
                 for (int i = 0; i < gageNum; i++)
                 {
-                    gagesRenderer[i].color = new Color(1, 1, 1, pow);
+                    gagesRenderer[i].color = activeGageColor;
                 }
                 gagesActivation = true;
             }
         }
-        public void gagesInActive(float pow)
+        public void gagesInActive()
         {
             if(gagesActivation)
             {
                 for(int i=0; i<gageNum; i++)
                 {
-                    gagesRenderer[i].color = new Color(1, 1, 1, pow);
+                    gagesRenderer[i].color = inActiveGageColor;
                 }
                 gagesActivation = false;
             }

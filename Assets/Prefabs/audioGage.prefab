@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3388495753301666796}
   - component: {fileID: 1208175804991644847}
   m_Layer: 0
-  m_Name: audioGage
+  m_Name: AudioGage
   m_TagString: UI
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
