@@ -55,6 +55,7 @@ namespace audio_app
             inputCap = appManage.InputCap;
 
             cap_stop = false;
+            //自環境で試した結果、8.0ms取得、512サンプル処理が一番遅延が少ないため、今回はこの設定で行う
             long hr = inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
             if (hr != 0) appManage.error();
             SamplingRate = appManage.AppConfig.SamplingRate;
@@ -136,6 +137,7 @@ namespace audio_app
                     if(!cap_stop) 
                         break;
                 }
+                //自環境で試した結果、2フレの遅延を入れることで音声取得がスムーズに行ったため
                 await Task.Delay(2);
             }
         }
@@ -167,11 +169,8 @@ namespace audio_app
         {
             for(int i=0; i<powerSpectre.Length; i++)
             {
-                // 振幅のパワー計測 0以上にしたほうが扱いやすいため+60.0f
-                // double t = Math.Pow(fftInput.Real[i], 2.0);
-                // powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f) + 60.0f;
                 double t = (Math.Pow(fftOutput.Real[i], 2.0) + Math.Pow(fftOutput.Imaginary[i], 2.0));
-                powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f);// + 60.0f;
+                powerSpectre[i] = Math.Max((float)(10.0 * Math.Log10(t)), -60.0f);
             }
         }
 

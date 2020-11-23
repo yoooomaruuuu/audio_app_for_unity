@@ -5,7 +5,6 @@ namespace audio_app
     public class PlayerIsWallTouch : MonoBehaviour
     {
         PlayerController playerController;
-        // Start is called before the first frame update
         void Start()
         {
             playerController = this.gameObject.transform.parent.gameObject.GetComponent<PlayerController>();

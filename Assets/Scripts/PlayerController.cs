@@ -22,7 +22,6 @@ namespace audio_app
         audioManajor audioManajor;
         Rigidbody2D rigid2D;
         float walkSpeed = 0.07f;
-        //float jumpForceLow = 20.0f;
         float jumpForceRaise = 30.0f;
 
         private Animator animator;
@@ -33,7 +32,6 @@ namespace audio_app
         bool isWallTouch = false;
         public bool IsWallTouch { set { this.isWallTouch = value; } }
 
-        // Start is called before the first frame update
         void Start()
         {
             sensiController = GameObject.Find("UI").GetComponent<AudioSensitivityController>();
@@ -59,12 +57,6 @@ namespace audio_app
     #else
             if(isTouch && this.rigid2D.velocity.y == 0.0f)
             {
-                // int jumpIndex = (int)(audioManajor.FFTSize * (jumpHz / (float)audioManajor.SamplingRate ));
-                // float[] powerSp = audioManajor.PowerSpectre; 
-                // float value = 0.0f;
-                // for (int i = jumpIndex; i < audioManajor.FFTSize / 2; i++) value += powerSp[i];
-                // value *= value * jumpSensitivity;
-                // if(value > jumpForceLow)
                 if(audioManajor.F0 > jumpSensitivity)
                  {
                     this.rigid2D.AddForce(transform.up * Math.Min(audioManajor.PowerSpectre.Max(), jumpForceRaise) * 20); 
@@ -96,22 +88,18 @@ namespace audio_app
             }
         }
 
-        // Update is called once per frame
         void Update()
         {
             if(sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG)
             {
-                //jumpSensitivity = 300.0f;
                 moveSensitivity = 12.0f;
             }
             else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.MEDIUM)
             {
-                //jumpSensitivity = 3.0f;
                 moveSensitivity = 36.0f;
             }
             else if(sensiController.Sensi == AudioSensitivityController.Sensitivity.WEAK)
             {
-                //jumpSensitivity = 1.0f;
                 moveSensitivity = 48.0f;
             }
         }

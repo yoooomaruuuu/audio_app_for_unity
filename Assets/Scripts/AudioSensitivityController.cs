@@ -16,13 +16,11 @@ namespace audio_app
 
         private Sensitivity sensi;
         public Sensitivity Sensi { get { return sensi; } }
-        // Start is called before the first frame update
         void Start()
         {
             sensiList = canvas.transform.Find("Sensitivity").GetComponent<Dropdown>();
             sensiList.onValueChanged.AddListener(delegate { sensiListValueChanged(sensiList); });
             sensi = (Sensitivity)PlayerPrefs.GetInt("sensitivity", 0);
-            //sensi = Sensitivity.STRONG;
         }
 
         void sensiListValueChanged(Dropdown change)

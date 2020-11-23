@@ -59,7 +59,6 @@ namespace audio_app
             }
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (sensiController.Sensi == AudioSensitivityController.Sensitivity.STRONG) gageLevelSensi = 24.0f;
@@ -82,10 +81,7 @@ namespace audio_app
                     for (int j = 0; j < sampleNum; j++)
                     {
                         value = System.Math.Max(samples[sampleNum * i + j], value);
-                        //value += samples[sampleNum * i + j];
                     }
-                    //test = test / (float)sampleNum;
-                    //if (double.IsInfinity(value)) value = 0.0f;
                     value /= gageLevelSensi;
                     gages[i].transform.Find("maskPivot").transform.localScale = new Vector3(1, value, 1);
                 }
