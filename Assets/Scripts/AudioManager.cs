@@ -43,9 +43,10 @@ namespace audio_app
         public double F0 { get; private set; }
         double[] f0TemporalPosition;
 
-        bool cap_stop;
+        bool cap_now;
 
         Thread rcv_wave_thread;
+        Thread audio_analysis_thread;
 
         void Start()
         {
@@ -53,7 +54,7 @@ namespace audio_app
             appManage = GameObject.Find("SceneManajor").GetComponent<ApplicationManager>();
             inputCap = appManage.InputCap;
 
-            cap_stop = false;
+            cap_now = false;
             //自環境で試した結果、8.0ms取得、512サンプル処理が一番遅延が少ないため、今回はこの設定で行う
             long hr = inputCap.initInputCapture(appManage.AppConfig.SamplingRate, appManage.AppConfig.Channels, appManage.AppConfig.BitsPerSampleValue, appManage.AppConfig.FrameMs, appManage.AppConfig.DeviceIndex);
             if (hr != 0) appManage.error();
@@ -82,8 +83,6 @@ namespace audio_app
             if (inputBitRate == BitRate.Integer16) typeMax = Int16.MaxValue;
             else if (inputBitRate == BitRate.Integer24) typeMax = Int24.max();
             else if (inputBitRate == BitRate.Integer32) typeMax = Int32.MaxValue;
-            else if (inputBitRate == BitRate.Integer64) typeMax = Int64.MaxValue;
-            else if (inputBitRate == BitRate.Floating32) typeMax = Single.MaxValue;
             else typeMax = Int16.MaxValue;
 
             captureBufferSize = inputCap.getDataBufferSize();
@@ -95,55 +94,60 @@ namespace audio_app
                 appManage.error();
             }
             rcv_wave_thread = new Thread(new ThreadStart(capture));
+            audio_analysis_thread = new Thread(new ThreadStart(analysis));
             rcv_wave_thread.Start();
-            cap_stop = true;
+            audio_analysis_thread.Start();
+            cap_now = true;
         }
         private async void capture()
         {
             while(true)
             {
-                long hr = inputCap.getCaptureData(ref captureDataPtr);
+                int size = 0;
+                long hr = inputCap.getCaptureData(ref captureDataPtr, ref size);
                 if (hr == 0)
                 {
-                    Marshal.Copy(captureDataPtr, captureData, 0, captureBufferSize);
-                    inputSoundDataConvert(captureData);
-                    if (waveBuffer.Count > frameBufferSize)
-                    {
-                        if (inputBitRate != BitRate.Floating32)
-                        {
-                            float[] tmp = waveBuffer.GetRange(0, frameBufferSize).ToArray();
-                            DataSamples = Array.ConvertAll(tmp, (x) => (float)(x / (double)typeMax));
-                        }
-                        else
-                        {
-                            DataSamples = waveBuffer.GetRange(0, frameBufferSize).ToArray();
-                        }
-                        // fft
-                        fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
-                        fftClass.fftRun(fftInput, fftOutput);
-                        calcPowerSpectre();
-                        calcDb();
-                        //f0estimate
-                        double[] f0tmp = Array.ConvertAll(DataSamples, (x) => (double)x);
-                        f0Class.HarvestExecute(f0tmp, f0tmp.Length, (int)SamplingRate, f0TemporalPosition, f0Array);
-                        F0 = f0Array.Min();
-
-                        waveBuffer.RemoveRange(0, frameBufferSize);
-                    }
+                    Marshal.Copy(captureDataPtr, captureData, 0, size);
+                    inputSoundDataConvert(captureData, size);
                 }
                 else
                 {
-                    if(!cap_stop) 
+                    if(!cap_now) 
                         break;
                 }
                 //自環境で試した結果、1フレの遅延を入れることで音声取得がスムーズに行ったため
-                await Task.Delay(1);
+                //await Task.Delay(1);
+            }
+        }
+
+        private async void analysis()
+        {
+            while(cap_now)
+            {
+                if (waveBuffer.Count > frameBufferSize)
+                {
+                    float[] tmp = waveBuffer.GetRange(0, frameBufferSize).ToArray();
+                    DataSamples = Array.ConvertAll(tmp, (x) => (float)(x / (double)typeMax));
+                    // fft
+                    fftInput.Real = Array.ConvertAll(DataSamples, FFTFuncs.hann_window);
+                    fftClass.fftRun(fftInput, fftOutput);
+                    calcPowerSpectre();
+                    calcDb();
+                    //f0estimate
+                    double[] f0tmp = Array.ConvertAll(DataSamples, (x) => (double)x);
+                    f0Class.HarvestExecute(f0tmp, f0tmp.Length, (int)SamplingRate, f0TemporalPosition, f0Array);
+                    F0 = f0Array.Min();
+
+                    waveBuffer.RemoveRange(0, frameBufferSize);
+                }
             }
         }
 
         private void OnDestroy()
         {
-            cap_stop = false;
+            cap_now = false;
+            audio_analysis_thread.Join();
+            audio_analysis_thread = null;
             rcv_wave_thread.Join();
             rcv_wave_thread = null;
             inputCap.stopCapture();
@@ -173,12 +177,12 @@ namespace audio_app
             }
         }
 
-        private void inputSoundDataConvert(byte[] captureData)
+        private void inputSoundDataConvert(byte[] captureData, int size)
         {
             int captureDataIncremation = (int)inputBitRate / 8 * inputChannels;
             if (inputBitRate == BitRate.Integer16)
             {
-                for (int i = 0; i < captureData.Length; i += captureDataIncremation)
+                for (int i = 0; i < size; i += captureDataIncremation)
                 {
                     byte[] tmp = new byte[] { captureData[i], captureData[i + 1] };
                     waveBuffer.Add((float)BitConverter.ToInt16(tmp, 0));
@@ -186,34 +190,18 @@ namespace audio_app
             }
             else if (inputBitRate == BitRate.Integer24)
             {
-                for (int i = 0; i < captureData.Length; i += captureDataIncremation)
+                for (int i = 0; i < size; i += captureDataIncremation)
                 {
-                    byte[] tmp = new byte[] { captureData[i], captureData[i + 1], captureData[i + 2] };
+                    byte[] tmp = new byte[] { captureData[i], captureData[i + 1], captureData[i + 2], 0x00 };
                     waveBuffer.Add((float)BitConverter.ToInt32(tmp, 0));
                 }
             }
             else if (inputBitRate == BitRate.Integer32)
             {
-                for (int i = 0; i < captureData.Length; i += captureDataIncremation)
+                for (int i = 0; i < size; i += captureDataIncremation)
                 {
                     byte[] tmp = new byte[] { captureData[i], captureData[i + 1], captureData[i + 2], captureData[i + 3] };
                     waveBuffer.Add((float)BitConverter.ToInt32(tmp, 0));
-                }
-            }
-            else if (inputBitRate == BitRate.Integer64)
-            {
-                for (int i = 0; i < captureData.Length; i += captureDataIncremation)
-                {
-                    byte[] tmp = new byte[] { captureData[i], captureData[i + 1], captureData[i + 2], captureData[i + 3], captureData[i + 4], captureData[i + 5], captureData[i + 6], captureData[i + 7] };
-                    waveBuffer.Add((float)BitConverter.ToInt64(tmp, 0));
-                }
-            }
-            else if (inputBitRate == BitRate.Floating32)
-            {
-                for (int i = 0; i < captureData.Length; i += captureDataIncremation)
-                {
-                    byte[] tmp = new byte[] { captureData[i], captureData[i + 1], captureData[i + 2], captureData[i + 3], captureData[i + 4], captureData[i + 5], captureData[i + 6], captureData[i + 7] };
-                    waveBuffer.Add(BitConverter.ToSingle(tmp, 0));
                 }
             }
         }

@@ -11,13 +11,13 @@ namespace lib_world
             public double framePeriod;
         }
 
-        [DllImport("lib_world", EntryPoint = "Harvest", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("win", EntryPoint = "Harvest", CallingConvention = CallingConvention.StdCall)]
         static extern void Harvest(double[] x, int xLength, int fs, ref HarvestOption option, double[] temporalPositions, double[] f0);
 
-        [DllImport("lib_world", EntryPoint = "InitializeHarvestOption", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("win", EntryPoint = "InitializeHarvestOption", CallingConvention = CallingConvention.StdCall)]
         static extern void InitializeHarvestOption(ref HarvestOption option);
 
-        [DllImport("lib_world", EntryPoint = "GetSamplesForHarvest", CallingConvention = CallingConvention.StdCall)]
+        [DllImport("win", EntryPoint = "GetSamplesForHarvest", CallingConvention = CallingConvention.StdCall)]
         static extern int GetSamplesForHarvest(int fs, int xLength, double framePeriod);
 
         HarvestOption mOption;
