@@ -29,7 +29,7 @@ namespace lib_audio_analysis
         static extern long start(IntPtr func_object);
 
         [DllImport("lib_audio_analysis", EntryPoint = "caputre_data", CallingConvention = CallingConvention.StdCall)]
-        static extern long caputre_data(ref IntPtr data, IntPtr func_object);
+        static extern long caputre_data(ref IntPtr data, ref int capture_length, IntPtr func_object);
 
         [DllImport("lib_audio_analysis", EntryPoint = "stop", CallingConvention = CallingConvention.StdCall)]
         static extern long stop(IntPtr func_object);
@@ -57,9 +57,9 @@ namespace lib_audio_analysis
             return start(mInputCap);
         }
 
-        public long getCaptureData(ref IntPtr data)
+        public long getCaptureData(ref IntPtr data, ref int capture_length)
         {
-            return caputre_data(ref data, mInputCap);
+            return caputre_data(ref data, ref capture_length, mInputCap);
         }
 
         public long stopCapture()

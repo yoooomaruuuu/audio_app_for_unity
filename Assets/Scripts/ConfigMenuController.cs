@@ -69,14 +69,6 @@ namespace audio_app
                 {
                     bitRate = BitRate.Integer32;
                 }
-                else if(bitsPerSampleList.value == 3)
-                {
-                    bitRate = BitRate.Integer64;
-                }
-                else if(bitsPerSampleList.value == 4)
-                {
-                    bitRate = BitRate.Floating32;
-                }
                 appmanage.AppConfig = new ApplicationManager.Config(
                     uint.Parse(samplingRateList.captionText.text),
                     ushort.Parse(channelList.captionText.text),

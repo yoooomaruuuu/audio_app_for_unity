@@ -4000,10 +4000,6 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: 32
       m_Image: {fileID: 0}
-    - m_Text: 64
-      m_Image: {fileID: 0}
-    - m_Text: float32
-      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:

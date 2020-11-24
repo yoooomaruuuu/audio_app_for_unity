@@ -15,8 +15,6 @@ namespace audio_app
             Integer16 = 16,
             Integer24 = 24,
             Integer32 = 32,
-            Integer64 = 64,
-            Floating32 = 32
         } ;
     }
 }
