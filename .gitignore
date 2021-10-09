@@ -16,6 +16,11 @@ ExportedObj/
 *.pdb
 *.opendb
 
+*.info*
+*.dll*
+Library/
+obj/
+
 # Unity3D generated meta files
 *.pidb.meta
 *.pdb.meta
